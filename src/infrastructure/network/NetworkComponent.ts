@@ -1,25 +1,25 @@
-import {GraphQLClient} from "graphql-request";
-import {regionRepository} from "../../feature/region/data/RegionRepositoryImpl";
+import { GraphQLClient } from "graphql-request";
+import { regionRepository } from "../../feature/region/data/RegionRepositoryImpl";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import {execSync} from "child_process";
+import { execSync } from "child_process";
 
-let instance: GraphQLClient | null = null
+let instance: GraphQLClient | null = null;
 export const getGraphqlClient = () => {
   if (instance == null) {
     instance = new GraphQLClient("", {
       headers: {
-        authorization: `Bearer ${getAuthToken()}`,
+        Authorization: `Bearer ${getAuthToken()}`,
       },
-    })
-    const endpoint = regionRepository.get()
+    });
+    const endpoint = regionRepository.get();
     if (endpoint.onSuccess) {
-      instance.setEndpoint(endpoint.onSuccess)
+      instance.setEndpoint(endpoint.onSuccess);
     }
   }
-  return instance
-}
+  return instance;
+};
 
 function getAuthToken(): string {
   const userHomeDir: string = os.homedir();
@@ -28,13 +28,13 @@ function getAuthToken(): string {
   if (fs.existsSync(directory)) {
     try {
       const data: string = fs.readFileSync(credentialPath, "utf-8");
-      const json = JSON.parse(data)
-      return json.accessToken
+      const json = JSON.parse(data);
+      return json.accessToken;
     } catch (e) {
-      return ""
+      return "";
     }
   } else {
-    return ""
+    return "";
   }
 }
 
@@ -45,7 +45,7 @@ interface ErrorResult {
 
 function isOnline(customUrl: string): boolean {
   try {
-    execSync(`ping -c 1 ${customUrl}`, {stdio: 'ignore'});
+    execSync(`ping -c 1 ${customUrl}`, { stdio: "ignore" });
     return true;
   } catch (error) {
     return false;
@@ -53,17 +53,19 @@ function isOnline(customUrl: string): boolean {
 }
 
 export function handleNetworkError(error: any): ErrorResult {
-  const endpoint = regionRepository.get()
+  const endpoint = regionRepository.get();
 
-  if (!endpoint.onSuccess) return {
-    errorClass: "CONNECTION",
-    errorMessage: "Please first set the region endpoint url"
-  }
+  if (!endpoint.onSuccess)
+    return {
+      errorClass: "CONNECTION",
+      errorMessage: "Please first set the region endpoint url",
+    };
 
-  if (!isOnline("8.8.8.8")) return {
-    errorClass: "CONNECTION",
-    errorMessage: "Please check the connection and try again"
-  }
+  if (!isOnline("8.8.8.8"))
+    return {
+      errorClass: "CONNECTION",
+      errorMessage: "Please check the connection and try again",
+    };
 
   try {
     const response = error.response;
@@ -71,11 +73,10 @@ export function handleNetworkError(error: any): ErrorResult {
       const firstError = response.errors[0];
       const errorClass = firstError.extensions ? firstError.extensions.classification : "";
       const errorMessage = firstError.message || "Unknown error";
-      return {errorClass, errorMessage};
+      return { errorClass, errorMessage };
     } else {
       console.error("Unexpected error format:", error.message);
     }
-  } catch (_) {
-  }
-  return {errorClass: "UnknownClass", errorMessage: "Unknown error"};
+  } catch (_) {}
+  return { errorClass: "UnknownClass", errorMessage: "Unknown error" };
 }
