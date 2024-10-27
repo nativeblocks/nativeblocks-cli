@@ -7,6 +7,7 @@ import { integrationSlot, syncIntegrationSlot } from "./feature/integration/inte
 import { auth } from "./feature/login/auth";
 import { getOrganization, organization, organizationList, setOrganization } from "./feature/organization/organization";
 import { getRegion, region, setRegion } from "./feature/region/region";
+import { frame, generateFrame, generateSchema, syncFrame } from "./feature/frame/frame";
 
 const program = new Command();
 
@@ -42,5 +43,10 @@ syncIntegrationData(dataCommand);
 
 const slotCommand = integrationSlot(integrationCommand);
 syncIntegrationSlot(slotCommand);
+
+const frameCommand = frame(program);
+generateFrame(frameCommand);
+syncFrame(frameCommand);
+generateSchema(frameCommand);
 
 program.parse();
