@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { frame, genFrame, pullFrame, pushFrame } from "./feature/frame/frame";
 import { addIntegration, integration, integrations, syncIntegration } from "./feature/integration/integration";
 import { integrationData, syncIntegrationData } from "./feature/integration/integrationData";
 import { integrationEvent, syncIntegrationEvent } from "./feature/integration/integrationEvent";
@@ -8,7 +9,6 @@ import { auth } from "./feature/login/auth";
 import { getOrganization, organization, organizationList, setOrganization } from "./feature/organization/organization";
 import { generateSchema, project } from "./feature/project/project";
 import { getRegion, region, setRegion } from "./feature/region/region";
-import { frame, generateFrame, generateSchema, syncFrame } from "./feature/frame/frame";
 
 const program = new Command();
 
@@ -49,8 +49,8 @@ const slotCommand = integrationSlot(integrationCommand);
 syncIntegrationSlot(slotCommand);
 
 const frameCommand = frame(program);
-generateFrame(frameCommand);
-syncFrame(frameCommand);
-generateSchema(frameCommand);
+genFrame(frameCommand);
+pushFrame(frameCommand);
+pullFrame(frameCommand);
 
 program.parse();

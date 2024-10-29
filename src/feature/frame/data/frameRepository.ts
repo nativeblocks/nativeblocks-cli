@@ -1,5 +1,7 @@
 import { ResultModel } from "../../../infrastructure/result/model/ResultModel";
+import { FrameModel } from "../domain/model/model";
 
 export interface FrameRepository {
-  syncFrame(apiKey: string, route: string, frameJson: string): Promise<ResultModel<any>>;
+  pushFrame(apiKey: string, route: string, frameJson: string): Promise<ResultModel<any>>;
+  pullFrame(apiKey: string, route: string): Promise<ResultModel<FrameModel>>;
 }
