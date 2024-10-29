@@ -125,7 +125,7 @@ export function generateBaseSchema(
             type: "array",
             items: {
               type: "object",
-              required: ["key", "type"],
+              required: ["key", "valueMobile", "valueTablet", "valueDesktop", "type"],
               properties: {
                 key: {
                   type: "string",
@@ -136,9 +136,6 @@ export function generateBaseSchema(
                       })
                     )
                   ),
-                },
-                value: {
-                  type: "string"
                 },
                 valueMobile: {
                   type: "string"

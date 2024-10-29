@@ -2,9 +2,8 @@ import { Command } from "commander";
 import fs from "fs";
 import path from "path";
 import { frameRepository } from "./data/FrameRepositoryImpl";
-import { buildActionTriggerTree, buildBlockTree } from "./domain/useCase/jsonToDsl";
 import { generateFrame } from "./domain/useCase/dslToJson";
-import { BlockModel } from "./domain/model/model";
+import { mapFrameModelToDSL } from "./domain/useCase/jsonToDsl";
 
 export function frame(program: Command) {
   return program.command("frame").description("Manage frame");
@@ -86,23 +85,9 @@ export function pullFrame(program: Command) {
           if (json) {
             const result = await frameRepository.pullFrame(apiKey, json.route);
             if (result.onSuccess) {
-              // json.blocks = buildBlockTree(
-              //   result.onSuccess?.blocks.map((block: BlockModel) => {
-              //     const actions =
-              //       result.onSuccess?.actions.filter((action) => {
-              //         return action.key === block.key;
-              //       }) ?? [];
-              //     block.actions = actions.map((action) => {
-              //       action.triggers = buildActionTriggerTree(action.triggers);
-              //       return action;
-              //     });
-              //     return block;
-              //   })
-              // );
-              // const allowed = ["name", "route", "type", "isStarter", "variables", "blocks"];
-              // const filtered = Object.fromEntries(Object.entries(json).filter(([key, val]) => allowed.includes(key)));
-              // fs.writeFileSync(directory, JSON.stringify(filtered));
-              // console.log(`Frame synced`);
+              const frame = mapFrameModelToDSL(result.onSuccess);
+              fs.writeFileSync(directory, JSON.stringify(frame));
+              console.log(`Frame synced`);
             } else {
               console.log(`Sync faild: ${result.onError}`);
             }

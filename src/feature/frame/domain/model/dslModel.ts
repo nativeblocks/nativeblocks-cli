@@ -12,23 +12,13 @@ export interface FrameDSLModel {
   isStarter: boolean;
   variables: VariableDSLModel[];
   blocks: BlockDSLModel[];
-  actions: ActionDSLModel[];
 }
 
-export class VariableDSLModel {
-  id: string;
+export interface VariableDSLModel {
   frameId: string;
   key: string;
   value: string;
   type: string;
-
-  constructor(frameId: string, key: string, value: string, type: string) {
-    this.id = generateId();
-    this.frameId = frameId;
-    this.key = key;
-    this.value = value;
-    this.type = type;
-  }
 }
 
 export interface BlockDSLModel {
@@ -46,7 +36,6 @@ export interface BlockDSLModel {
 
 export interface BlockPropertyDSLModel {
   key: string;
-  value: string;
   valueMobile: string;
   valueTablet: string;
   valueDesktop: string;

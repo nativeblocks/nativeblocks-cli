@@ -131,35 +131,19 @@ function processBlocks(
 
     const blockProperties =
       block.properties?.map((property) => {
-        if (property.value) {
-          return {
-            id: generateId(),
-            blockId: newBlock.id,
-            key: property.key,
-            type: property.type,
-            valueMobile: property.value,
-            valueTablet: property.value,
-            valueDesktop: property.value,
-            description: property.description ?? "",
-            valuePicker: property.valuePicker ?? "",
-            valuePickerGroup: property.valuePickerGroup ?? "",
-            valuePickerOptions: property.valuePickerOptions ?? "",
-          } as BlockPropertyModel;
-        } else {
-          return {
-            id: generateId(),
-            blockId: newBlock.id,
-            key: property.key,
-            type: property.type,
-            valueMobile: property.valueMobile,
-            valueTablet: property.valueTablet,
-            valueDesktop: property.valueDesktop,
-            description: property.description ?? "",
-            valuePicker: property.valuePicker ?? "",
-            valuePickerGroup: property.valuePickerGroup ?? "",
-            valuePickerOptions: property.valuePickerOptions ?? "",
-          } as BlockPropertyModel;
-        }
+        return {
+          id: generateId(),
+          blockId: newBlock.id,
+          key: property.key,
+          type: property.type,
+          valueMobile: property.valueMobile,
+          valueTablet: property.valueTablet,
+          valueDesktop: property.valueDesktop,
+          description: property.description ?? "",
+          valuePicker: property.valuePicker ?? "",
+          valuePickerGroup: property.valuePickerGroup ?? "",
+          valuePickerOptions: property.valuePickerOptions ?? "",
+        } as BlockPropertyModel;
       }) ?? [];
 
     const blockData =
