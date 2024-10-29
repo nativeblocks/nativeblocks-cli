@@ -7,7 +7,7 @@ import { integrationProperty, syncIntegrationProperty } from "./feature/integrat
 import { integrationSlot, syncIntegrationSlot } from "./feature/integration/integrationSlot";
 import { auth } from "./feature/login/auth";
 import { getOrganization, organization, organizationList, setOrganization } from "./feature/organization/organization";
-import { generateSchema, project } from "./feature/project/project";
+import { generateSchema, getProject, project, projectList, setProject } from "./feature/project/project";
 import { getRegion, region, setRegion } from "./feature/region/region";
 
 const program = new Command();
@@ -30,6 +30,9 @@ getOrganization(organizationCommand);
 
 const projectCommand = project(program);
 generateSchema(projectCommand);
+projectList(projectCommand)
+getProject(projectCommand)
+setProject(projectCommand)
 
 const integrationCommand = integration(program);
 integrations(integrationCommand);
