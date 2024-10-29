@@ -9,13 +9,17 @@ export function generateBaseSchema(
   const baseSchema = {
     $schema: "http://json-schema.org/draft-07/schema#",
     type: "object",
-    required: ["name", "route", "isStarter", "variables", "blocks"],
+    required: ["name", "route", "isStarter", "type", "variables", "blocks"],
     properties: {
       name: {
         type: "string",
       },
       route: {
         type: "string",
+      },
+      type: {
+        type: "string",
+        enum: ["FRAME", "BOTTOM_SHEET", "DIALOG"]
       },
       isStarter: {
         type: "boolean",

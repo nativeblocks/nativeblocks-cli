@@ -6,6 +6,7 @@ import { integrationProperty, syncIntegrationProperty } from "./feature/integrat
 import { integrationSlot, syncIntegrationSlot } from "./feature/integration/integrationSlot";
 import { auth } from "./feature/login/auth";
 import { getOrganization, organization, organizationList, setOrganization } from "./feature/organization/organization";
+import { generateSchema, project } from "./feature/project/project";
 import { getRegion, region, setRegion } from "./feature/region/region";
 import { frame, generateFrame, generateSchema, syncFrame } from "./feature/frame/frame";
 
@@ -26,6 +27,9 @@ const organizationCommand = organization(program);
 organizationList(organizationCommand);
 setOrganization(organizationCommand);
 getOrganization(organizationCommand);
+
+const projectCommand = project(program);
+generateSchema(projectCommand);
 
 const integrationCommand = integration(program);
 integrations(integrationCommand);
