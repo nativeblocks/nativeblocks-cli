@@ -60,63 +60,116 @@ export function getProject(program: Command) {
     });
 }
 
-export function prepareSchema(program: Command) {
-  return program
-    .command("prepare-schema")
-    .description("Prepare installed integration for schema")
-    .option("-d, --directory", "Project working root directory")
-    .argument("<directory>", "Project working root directory")
-    .action((directory) => {
-      const jsonFilePath: string = path.join(directory + "/.nativeblocks/integrations");
-      if (fs.existsSync(jsonFilePath)) {
-        try {
-          let blockKeyTypes = [] as any[];
-          let blockPropertyKeys = [] as any[];
-          let blockDataKeys = [] as any[];
-          let actionKeyTypes = [] as any[];
-          let actionPropertyKeys = [] as any[];
-          let actionDataKeys = [] as any[];
-
-          if (fs.existsSync(jsonFilePath + "/block")) {
-            blockKeyTypes = findKeyTypes(jsonFilePath + "/block");
-            blockPropertyKeys = findProperties(jsonFilePath + "/block");
-            blockDataKeys = findData(jsonFilePath + "/block");
-          }
-
-          if (fs.existsSync(jsonFilePath + "/action")) {
-            actionKeyTypes = findKeyTypes(jsonFilePath + "/action");
-            actionPropertyKeys = findProperties(jsonFilePath + "/action");
-            actionDataKeys = findData(jsonFilePath + "/action");
-          }
-
-          const schema = generateBaseSchema(
-            new Set(["ROOT", ...blockKeyTypes]),
-            new Set(actionKeyTypes),
-            blockPropertyKeys,
-            blockDataKeys,
-            actionPropertyKeys,
-            actionDataKeys
-          );
-
-          console.log("=========================================================================================");
-          const path = createDefaultDir(directory);
-          fs.writeFileSync(`${path}/schema.json`, JSON.stringify(schema));
-          console.log(`The result saved into ${path}/schema.json`);
-          console.log("=========================================================================================");
-        } catch (e) {
-          console.log(e);
-        }
-      } else {
-        console.log(`could not retrieve from ${jsonFilePath}`);
-      }
-    });
-}
-
 export function generateSchema(program: Command) {
   return program
     .command("gen-schema")
     .description("Generate a schema")
+    .option("-e, --edition", "Cloud or Community edition")
     .option("-d, --directory", "Project working root directory")
+    .argument("<edition>", "Cloud or Community edition")
     .argument("<directory>", "Project working root directory")
-    .action((directory) => {});
+    .action(async (edition, directory) => {
+      if (edition === "CLOUD" || edition === "cloud" || edition === "Cloud") {
+        let blockKeyTypes = [] as any[];
+        let blockPropertyKeys = [] as any[];
+        let blockDataKeys = [] as any[];
+        let actionKeyTypes = [] as any[];
+        let actionPropertyKeys = [] as any[];
+        let actionDataKeys = [] as any[];
+
+        const organization = await organizationRepository.get();
+        const project = await projectRepository.get();
+        if (project.onSuccess) {
+          const blockIntegrations = await projectRepository.getInstalledIntegrations(
+            organization.onSuccess ?? "",
+            project.onSuccess.id ?? "",
+            "BLOCK"
+          );
+
+          blockIntegrations.onSuccess?.forEach((installed) => {
+            blockKeyTypes = [...blockKeyTypes, installed.integrationKeyType];
+            installed.integrationProperties.forEach((property) => {
+              blockPropertyKeys = [...blockPropertyKeys, property];
+            });
+            installed.integrationData.forEach((dataItem) => {
+              blockDataKeys = [...blockDataKeys, dataItem];
+            });
+          });
+
+          const actionIntegrations = await projectRepository.getInstalledIntegrations(
+            organization.onSuccess ?? "",
+            project.onSuccess.id ?? "",
+            "ACTION"
+          );
+          actionIntegrations.onSuccess?.forEach((installed) => {
+            actionKeyTypes = [...actionKeyTypes, installed.integrationKeyType];
+            installed.integrationProperties.forEach((property) => {
+              actionPropertyKeys = [...actionPropertyKeys, property];
+            });
+            installed.integrationData.forEach((dataItem) => {
+              blockDataKeys = [...blockDataKeys, dataItem];
+            });
+          });
+        } else {
+          console.log(project.onError);
+        }
+        const schema = generateBaseSchema(
+          new Set(blockKeyTypes),
+          new Set(actionKeyTypes),
+          blockPropertyKeys,
+          blockDataKeys,
+          actionPropertyKeys,
+          actionDataKeys
+        );
+
+        console.log("=========================================================================================");
+        const path = createDefaultDir(directory);
+        fs.writeFileSync(`${path}/schema.json`, JSON.stringify(schema));
+        console.log(`The result saved into ${path}/schema.json`);
+        console.log("=========================================================================================");
+      } else {
+        const jsonFilePath: string = path.join(directory + "/.nativeblocks/integrations");
+        if (fs.existsSync(jsonFilePath)) {
+          try {
+            let blockKeyTypes = [] as any[];
+            let blockPropertyKeys = [] as any[];
+            let blockDataKeys = [] as any[];
+            let actionKeyTypes = [] as any[];
+            let actionPropertyKeys = [] as any[];
+            let actionDataKeys = [] as any[];
+
+            if (fs.existsSync(jsonFilePath + "/block")) {
+              blockKeyTypes = findKeyTypes(jsonFilePath + "/block");
+              blockPropertyKeys = findProperties(jsonFilePath + "/block");
+              blockDataKeys = findData(jsonFilePath + "/block");
+            }
+
+            if (fs.existsSync(jsonFilePath + "/action")) {
+              actionKeyTypes = findKeyTypes(jsonFilePath + "/action");
+              actionPropertyKeys = findProperties(jsonFilePath + "/action");
+              actionDataKeys = findData(jsonFilePath + "/action");
+            }
+
+            const schema = generateBaseSchema(
+              new Set(["ROOT", ...blockKeyTypes]),
+              new Set(actionKeyTypes),
+              blockPropertyKeys,
+              blockDataKeys,
+              actionPropertyKeys,
+              actionDataKeys
+            );
+
+            console.log("=========================================================================================");
+            const path = createDefaultDir(directory);
+            fs.writeFileSync(`${path}/schema.json`, JSON.stringify(schema));
+            console.log(`The result saved into ${path}/schema.json`);
+            console.log("=========================================================================================");
+          } catch (e) {
+            console.log(e);
+          }
+        } else {
+          console.log(`could not retrieve from ${jsonFilePath}`);
+        }
+      }
+    });
 }

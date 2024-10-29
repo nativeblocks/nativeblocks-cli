@@ -4,6 +4,7 @@ import os from "os";
 import path from "path";
 import { getGraphqlClient, handleNetworkError } from "../../../infrastructure/network/NetworkComponent";
 import { ResultModel } from "../../../infrastructure/result/model/ResultModel";
+import { IntegrationsInstalledModel } from "./model/installedIntegrationModel";
 import { ProjectRepository } from "./projectRepository";
 
 export const GET_PROJECTS_QUERY = gql`
@@ -39,6 +40,33 @@ export const GET_PROJECT_QUERY = gql`
   }
 `;
 
+export const INTEGRATIONS_INSTALLED_QUERY = gql`
+  query integrationsInstalled($organizationId: String!, $projectId: String!, $kind: String!) {
+    integrationsInstalled(organizationId: $organizationId, projectId: $projectId, kind: $kind) {
+      integrationKeyType
+      integrationVersion
+      integrationId
+      integrationPlatformSupport
+      integrationKind
+      integrationProperties {
+        key
+        value
+        type
+      }
+      integrationData {
+        key
+        type
+      }
+      integrationEvents {
+        event
+      }
+      integrationSlots {
+        slot
+      }
+    }
+  }
+`;
+
 export type ProjectModel = {
   id: string;
   name: string;
@@ -62,8 +90,48 @@ class ProjectRepositoryImpl implements ProjectRepository {
     this.graphqlClient = graphqlClient;
   }
 
-  async getInstalledIntegrations(projectId: string): Promise<ResultModel<any>> {
-    throw Error();
+  mapToIntegrationModel(integration: any): IntegrationsInstalledModel {
+    return {
+      integrationKeyType: integration.integrationKeyType,
+      integrationVersion: integration.integrationVersion,
+      integrationId: integration.integrationId,
+      integrationPlatformSupport: integration.integrationPlatformSupport,
+      integrationKind: integration.integrationKind,
+      integrationProperties: integration.integrationProperties.map((property: any) => ({
+        key: property.key,
+        value: property.value,
+        type: property.type,
+      })),
+      integrationData: integration.integrationData.map((dataItem: any) => ({
+        key: dataItem.key,
+        type: dataItem.type,
+      })),
+      integrationEvents: integration.integrationEvents.map((event: any) => ({
+        event: event.event,
+      })),
+      integrationSlots: integration.integrationSlots.map((slot: any) => ({
+        slot: slot.slot,
+      })),
+    };
+  }
+
+  async getInstalledIntegrations(organizationId: string, projectId: string, kind: string): Promise<ResultModel<any>> {
+    try {
+      const result = await this.graphqlClient.request(INTEGRATIONS_INSTALLED_QUERY, {
+        organizationId: organizationId,
+        projectId: projectId,
+        kind: kind,
+      });
+      return {
+        onSuccess: result.integrationsInstalled.map((integration: any) => {
+          return this.mapToIntegrationModel(integration);
+        }),
+      };
+    } catch (error: any) {
+      return {
+        onError: handleNetworkError(error).errorMessage,
+      };
+    }
   }
 
   async projects(organizationId: string): Promise<ResultModel<ProjectModel[]>> {
