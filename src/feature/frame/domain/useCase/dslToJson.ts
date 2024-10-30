@@ -105,7 +105,8 @@ function processTriggers(
 function processBlocks(
   frameId: string,
   blocks: BlockDSLModel[],
-  parentId: string = "",
+  parentId: string,
+  parentSlots: BlockSlotModel[],
   variables: VariableModel[],
   onNewAction: (actions: ActionModel[]) => void
 ): BlockModel[] {
@@ -172,6 +173,17 @@ function processBlocks(
     newBlock.data = blockData;
     newBlock.slots = blocSlots;
 
+    if (newBlock.parentId) {
+      const checkSlot = parentSlots.find((it) => {
+        return it.slot === newBlock.slot;
+      });
+      if (!checkSlot) {
+        throw new Error(
+          `The '${block.key}' defined in a wrong slot, the parent block supports [${parentSlots.map((it) => it.slot).join(",")}]`
+        );
+      }
+    }
+
     const variable = variables.find((v) => v.key === newBlock.visibilityKey);
     if (!variable) {
       throw new Error(`Variable with key '${newBlock.visibilityKey}' not found`);
@@ -189,7 +201,14 @@ function processBlocks(
     flatBlocks.push(newBlock);
 
     if (block.blocks && block.blocks.length > 0) {
-      const subBlockResults = processBlocks(frameId, block?.blocks ?? [], newBlock.id, variables, onNewAction);
+      const subBlockResults = processBlocks(
+        frameId,
+        block?.blocks ?? [],
+        newBlock.id,
+        newBlock.slots,
+        variables,
+        onNewAction
+      );
       flatBlocks = flatBlocks.concat(subBlockResults);
     }
   });
@@ -226,7 +245,7 @@ export async function generateFrame(frameDSL: FrameDSLModel) {
       } as VariableModel;
     });
     const actions: ActionModel[] = [];
-    const blocks = processBlocks(frameId, frameDSL.blocks, "", variables ?? [], (blockActions) => {
+    const blocks = processBlocks(frameId, frameDSL.blocks, "", [], variables ?? [], (blockActions) => {
       actions.push(...blockActions);
     });
     return {
