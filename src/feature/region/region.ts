@@ -1,5 +1,5 @@
-import {Command} from "commander";
-import {regionRepository} from "./data/RegionRepositoryImpl";
+import { Command } from "commander";
+import { regionRepository } from "./data/RegionRepositoryImpl";
 
 export function region(program: Command) {
   return program
