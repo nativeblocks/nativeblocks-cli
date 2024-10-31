@@ -1,6 +1,6 @@
 {
   "name": "@nativeblocks/cli",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Nativeblocks CLI",
   "main": "dist/cjs/index.js",
   "bin": {
