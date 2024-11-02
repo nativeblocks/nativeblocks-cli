@@ -21,7 +21,6 @@ func NewFileManager() (*FileManager, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get home directory: %v", err)
 	}
-	fmt.Printf("HHHH", homeDir)
 
 	baseDir := filepath.Join(homeDir, ConfigDirName, CliDirName)
 	if err := os.MkdirAll(baseDir, 0755); err != nil {
