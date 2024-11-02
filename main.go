@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/nativeblocks/cli/cmd/auth"
 	region "github.com/nativeblocks/cli/cmd/region"
 	"github.com/spf13/cobra"
 )
@@ -16,6 +17,7 @@ func main() {
 
 	rootCmd.AddCommand(
 		region.RegionCmd(),
+		auth.AuthCmd(),
 	)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
