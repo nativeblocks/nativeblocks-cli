@@ -31,7 +31,7 @@ func regionSetCmd() *cobra.Command {
 		Short: "Set API region URL",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fm, err := fileutil.NewFileManager()
+			fm, err := fileutil.NewFileManager(nil)
 			if err != nil {
 				return err
 			}
@@ -52,7 +52,7 @@ func regionGetCmd() *cobra.Command {
 		Use:   "get",
 		Short: "Get current API region URL",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fm, err := fileutil.NewFileManager()
+			fm, err := fileutil.NewFileManager(nil)
 			if err != nil {
 				return err
 			}

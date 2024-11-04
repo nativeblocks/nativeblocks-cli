@@ -63,7 +63,7 @@ func organizationListCmd() *cobra.Command {
 		Use:   "list",
 		Short: "List and select an organization",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fm, err := fileutil.NewFileManager()
+			fm, err := fileutil.NewFileManager(nil)
 			if err != nil {
 				return err
 			}
@@ -149,7 +149,7 @@ func organizationGetCmd() *cobra.Command {
 		Use:   "get",
 		Short: "Get current organization",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fm, err := fileutil.NewFileManager()
+			fm, err := fileutil.NewFileManager(nil)
 			if err != nil {
 				return err
 			}

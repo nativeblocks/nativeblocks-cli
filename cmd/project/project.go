@@ -74,6 +74,7 @@ func NewProjectCmd() *cobra.Command {
 
 	cmd.AddCommand(projectListCmd())
 	cmd.AddCommand(projectGetCmd())
+	cmd.AddCommand(projectSchemaGenCmd())
 	return cmd
 }
 
@@ -82,7 +83,7 @@ func projectListCmd() *cobra.Command {
 		Use:   "list",
 		Short: "List and select a project",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fm, err := fileutil.NewFileManager()
+			fm, err := fileutil.NewFileManager(nil)
 			if err != nil {
 				return err
 			}
@@ -188,7 +189,7 @@ func projectGetCmd() *cobra.Command {
 		Use:   "get",
 		Short: "Get current project",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fm, err := fileutil.NewFileManager()
+			fm, err := fileutil.NewFileManager(nil)
 			if err != nil {
 				return err
 			}
@@ -202,4 +203,59 @@ func projectGetCmd() *cobra.Command {
 			return nil
 		},
 	}
+}
+
+func projectSchemaGenCmd() *cobra.Command {
+	var edition string
+	var directory string
+	cmd := &cobra.Command{
+		Use:   "gen-schema",
+		Short: "Generate a JSON schema file",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fm, err := fileutil.NewFileManager(&directory)
+			if err != nil {
+				return err
+			}
+			blockKeyTypes := make([]string, 0)
+			blockProperties := make([]MetaItem, 0)
+			blockData := make([]MetaItem, 0)
+
+			actionKeyTypes := make([]string, 0)
+			actionProperties := make([]MetaItem, 0)
+			actionData := make([]MetaItem, 0)
+
+			blockExist := fm.FileExists("integrations/block")
+
+			if blockExist {
+				blockKeyTypes = FindKeyTypes(fm.BaseDir + "/integrations/block")
+				blockProperties = FindProperties(fm.BaseDir + "/integrations/block")
+				blockData = FindData(fm.BaseDir + "/integrations/block")
+			}
+
+			actionExist := fm.FileExists("integrations/action")
+			if actionExist {
+				actionKeyTypes = FindKeyTypes(fm.BaseDir + "/integrations/action")
+				actionProperties = FindProperties(fm.BaseDir + "/integrations/action")
+				actionData = FindData(fm.BaseDir + "/integrations/action")
+			}
+
+			blockKeyTypes = append(blockKeyTypes, "ROOT")
+
+			schema, err := generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockData, actionProperties, actionData)
+			if err != nil {
+				return nil
+			}
+
+			if err := fm.SaveToFile("schema.json", schema); err != nil {
+				return err
+			}
+			fmt.Printf("Schema file generated successfully at %s \n", directory)
+			return nil
+		},
+	}
+	cmd.Flags().StringVarP(&edition, "edition", "e", "", "Edition type (cloud or community)")
+	cmd.Flags().StringVarP(&directory, "directory", "d", "", "Output directory path")
+	cmd.MarkFlagRequired("edition")
+	cmd.MarkFlagRequired("directory")
+	return cmd
 }

@@ -46,7 +46,7 @@ func AuthCmd() *cobra.Command {
 		Use:   "auth",
 		Short: "Authenticate with username and password",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fm, err := fileutil.NewFileManager()
+			fm, err := fileutil.NewFileManager(nil)
 			if err != nil {
 				return err
 			}
@@ -107,7 +107,6 @@ func AuthCmd() *cobra.Command {
 		},
 	}
 
-	// Add flags
 	cmd.Flags().StringVarP(&username, "username", "u", "", "Username/Email")
 	cmd.Flags().StringVarP(&password, "password", "p", "", "Password")
 	cmd.MarkFlagRequired("username")
