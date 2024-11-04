@@ -66,6 +66,68 @@ const projectsQuery = `
   }
 `
 
+type IntegrationProperty struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+	Type  string `json:"type"`
+}
+
+type IntegrationData struct {
+	Key  string `json:"key"`
+	Type string `json:"type"`
+}
+
+type IntegrationEvent struct {
+	Event string `json:"event"`
+}
+
+type IntegrationSlot struct {
+	Slot string `json:"slot"`
+}
+
+type Integration struct {
+	IntegrationKeyType         string                `json:"integrationKeyType"`
+	IntegrationVersion         int8                  `json:"integrationVersion"`
+	IntegrationID              string                `json:"integrationId"`
+	IntegrationPlatformSupport string                `json:"integrationPlatformSupport"`
+	IntegrationKind            string                `json:"integrationKind"`
+	IntegrationProperties      []IntegrationProperty `json:"integrationProperties"`
+	IntegrationData            []IntegrationData     `json:"integrationData"`
+	IntegrationEvents          []IntegrationEvent    `json:"integrationEvents"`
+	IntegrationSlots           []IntegrationSlot     `json:"integrationSlots"`
+}
+
+type InstalledIntegrationResponse struct {
+	IntegrationsInstalled []Integration `json:"integrationsInstalled"`
+}
+
+const installedIntegrationsQuery = `
+	query integrationsInstalled($organizationId: String!, $projectId: String!, $kind: String!) {
+		integrationsInstalled(organizationId: $organizationId, projectId: $projectId, kind: $kind) {
+			integrationKeyType
+			integrationVersion
+			integrationId
+			integrationPlatformSupport
+			integrationKind
+			integrationProperties {
+				key
+				value
+				type
+			}
+			integrationData {
+				key
+				type
+			}
+			integrationEvents {
+				event
+			}
+			integrationSlots {
+				slot
+			}
+		}
+	}
+`
+
 func NewProjectCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "project",
@@ -212,7 +274,7 @@ func projectSchemaGenCmd() *cobra.Command {
 		Use:   "gen-schema",
 		Short: "Generate a JSON schema file",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fm, err := fileutil.NewFileManager(&directory)
+			inputFm, err := fileutil.NewFileManager(&directory)
 			if err != nil {
 				return err
 			}
@@ -224,29 +286,64 @@ func projectSchemaGenCmd() *cobra.Command {
 			actionProperties := make([]MetaItem, 0)
 			actionData := make([]MetaItem, 0)
 
-			blockExist := fm.FileExists("integrations/block")
+			if edition == "cloud" || edition == "Cloud" || edition == "CLOUD" {
+				installedBlocks, err := getInstalledIntegration("BLOCK")
+				if err != nil {
+					return err
+				}
 
-			if blockExist {
-				blockKeyTypes = FindKeyTypes(fm.BaseDir + "/integrations/block")
-				blockProperties = FindProperties(fm.BaseDir + "/integrations/block")
-				blockData = FindData(fm.BaseDir + "/integrations/block")
+				for _, installedIntegration := range installedBlocks.IntegrationsInstalled {
+					blockKeyTypes = append(blockKeyTypes, installedIntegration.IntegrationKeyType)
+					for _, property := range installedIntegration.IntegrationProperties {
+						meta := MetaItem(property)
+						blockProperties = append(blockProperties, meta)
+					}
+					for _, dataItem := range installedIntegration.IntegrationData {
+						meta := MetaItem{Key: dataItem.Key, Value: "", Type: dataItem.Type}
+						blockData = append(blockData, meta)
+					}
+				}
+
+				installedActions, err := getInstalledIntegration("ACTION")
+				if err != nil {
+					return err
+				}
+
+				for _, installedIntegration := range installedActions.IntegrationsInstalled {
+					actionKeyTypes = append(actionKeyTypes, installedIntegration.IntegrationKeyType)
+					for _, property := range installedIntegration.IntegrationProperties {
+						meta := MetaItem(property)
+						actionProperties = append(actionProperties, meta)
+					}
+					for _, dataItem := range installedIntegration.IntegrationData {
+						meta := MetaItem{Key: dataItem.Key, Value: "", Type: dataItem.Type}
+						actionData = append(actionData, meta)
+					}
+				}
+			} else {
+				blockExist := inputFm.FileExists("integrations/block")
+				if blockExist {
+					blockKeyTypes = FindKeyTypes(inputFm.BaseDir + "/integrations/block")
+					blockProperties = FindProperties(inputFm.BaseDir + "/integrations/block")
+					blockData = FindData(inputFm.BaseDir + "/integrations/block")
+				}
+
+				actionExist := inputFm.FileExists("integrations/action")
+				if actionExist {
+					actionKeyTypes = FindKeyTypes(inputFm.BaseDir + "/integrations/action")
+					actionProperties = FindProperties(inputFm.BaseDir + "/integrations/action")
+					actionData = FindData(inputFm.BaseDir + "/integrations/action")
+				}
+
+				blockKeyTypes = append(blockKeyTypes, "ROOT")
 			}
-
-			actionExist := fm.FileExists("integrations/action")
-			if actionExist {
-				actionKeyTypes = FindKeyTypes(fm.BaseDir + "/integrations/action")
-				actionProperties = FindProperties(fm.BaseDir + "/integrations/action")
-				actionData = FindData(fm.BaseDir + "/integrations/action")
-			}
-
-			blockKeyTypes = append(blockKeyTypes, "ROOT")
 
 			schema, err := generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockData, actionProperties, actionData)
 			if err != nil {
 				return nil
 			}
 
-			if err := fm.SaveToFile("schema.json", schema); err != nil {
+			if err := inputFm.SaveToFile("schema.json", schema); err != nil {
 				return err
 			}
 			fmt.Printf("Schema file generated successfully at %s \n", directory)
@@ -258,4 +355,65 @@ func projectSchemaGenCmd() *cobra.Command {
 	cmd.MarkFlagRequired("edition")
 	cmd.MarkFlagRequired("directory")
 	return cmd
+}
+
+func getInstalledIntegration(kind string) (*InstalledIntegrationResponse, error) {
+	fm, err := fileutil.NewFileManager(nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var regionConfig RegionConfig
+	if err := fm.LoadFromFile(RegionFileName, &regionConfig); err != nil {
+		return nil, fmt.Errorf("region not set. Please set region first using 'nativeblocks region set <url>'")
+	}
+
+	var authConfig AuthConfig
+	if err := fm.LoadFromFile(AuthFileName, &authConfig); err != nil {
+		return nil, fmt.Errorf("not authenticated. Please login first using 'nativeblocks auth'")
+	}
+
+	var orgConfig OrganizationConfig
+	if err := fm.LoadFromFile(OrganizationFileName, &orgConfig); err != nil {
+		return nil, fmt.Errorf("organization not set. Please select an organization first using 'nativeblocks organization list'")
+	}
+
+	var projConfig ProjectConfig
+	if err := fm.LoadFromFile(ProjectFileName, &projConfig); err != nil {
+		return nil, fmt.Errorf("project not set. Please select a project first using 'nativeblocks project list'")
+	}
+
+	client := graphqlutil.NewClient()
+
+	headers := map[string]string{
+		"Authorization": "Bearer " + authConfig.AccessToken,
+	}
+
+	variables := map[string]interface{}{
+		"organizationId": orgConfig.Id,
+		"projectId":      projConfig.Id,
+		"kind":           kind,
+	}
+
+	resp, err := client.Execute(
+		regionConfig.Url,
+		headers,
+		installedIntegrationsQuery,
+		variables,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch installed integrations: %v", err)
+	}
+
+	responseData, err := json.Marshal(resp.Data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to process response: %v", err)
+	}
+
+	var installedIntegrationResponse InstalledIntegrationResponse
+	if err := json.Unmarshal(responseData, &installedIntegrationResponse); err != nil {
+		fmt.Printf("Debug - Raw response: %s\n", string(responseData))
+		return nil, fmt.Errorf("failed to parse projects response: %v", err)
+	}
+	return &installedIntegrationResponse, nil
 }
