@@ -159,7 +159,7 @@ func organizationGetCmd() *cobra.Command {
 				return err
 			}
 
-			fmt.Printf("Current organization: %s\n", config)
+			fmt.Printf("Current organization: %s \n", config.Name)
 			return nil
 		},
 	}

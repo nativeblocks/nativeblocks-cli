@@ -6,7 +6,8 @@ import (
 
 	"github.com/nativeblocks/cli/cmd/auth"
 	"github.com/nativeblocks/cli/cmd/organization"
-	region "github.com/nativeblocks/cli/cmd/region"
+	"github.com/nativeblocks/cli/cmd/project"
+	"github.com/nativeblocks/cli/cmd/region"
 	"github.com/spf13/cobra"
 )
 
@@ -20,6 +21,7 @@ func main() {
 		region.RegionCmd(),
 		auth.AuthCmd(),
 		organization.NewOrganizationCmd(),
+		project.NewProjectCmd(),
 	)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
