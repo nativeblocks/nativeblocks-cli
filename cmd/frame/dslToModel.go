@@ -47,6 +47,11 @@ func processTriggers(actionID string, triggers []ActionTriggerDSLModel, parentID
 			Data:               []TriggerDataModel{},
 		}
 
+		if newTrigger.ParentID == nil {
+			emptyParentID := ""
+			newTrigger.ParentID = &emptyParentID
+		}
+
 		for _, property := range trigger.Properties {
 			newProperty := TriggerPropertyModel{
 				ID:                 generateId(),
@@ -59,6 +64,12 @@ func processTriggers(actionID string, triggers []ActionTriggerDSLModel, parentID
 				ValuePickerGroup:   property.ValuePickerGroup,
 				ValuePickerOptions: property.ValuePickerOptions,
 			}
+
+			if newProperty.Description == nil {
+				emptyDescription := ""
+				newProperty.Description = &emptyDescription
+			}
+
 			newTrigger.Properties = append(newTrigger.Properties, newProperty)
 		}
 
@@ -71,6 +82,12 @@ func processTriggers(actionID string, triggers []ActionTriggerDSLModel, parentID
 				Type:            dataItem.Type,
 				Description:     dataItem.Description,
 			}
+
+			if newData.Description == nil {
+				emptyDescription := ""
+				newData.Description = &emptyDescription
+			}
+
 			newTrigger.Data = append(newTrigger.Data, newData)
 		}
 
@@ -129,6 +146,11 @@ func processBlocks(frameID string, blocks []BlockDSLModel, parentID *string, par
 			newBlock.Slot = &contentSlot
 		}
 
+		if newBlock.ParentID == nil {
+			emptyParentID := ""
+			newBlock.ParentID = &emptyParentID
+		}
+
 		onNewAction(processActions(frameID, block.Key, block.Actions, variables))
 
 		for _, property := range block.Properties {
@@ -145,6 +167,12 @@ func processBlocks(frameID string, blocks []BlockDSLModel, parentID *string, par
 				ValuePickerGroup:   property.ValuePickerGroup,
 				ValuePickerOptions: property.ValuePickerOptions,
 			}
+
+			if newProperty.Description == nil {
+				emptyDescription := ""
+				newProperty.Description = &emptyDescription
+			}
+
 			newBlock.Properties = append(newBlock.Properties, newProperty)
 		}
 
@@ -157,6 +185,12 @@ func processBlocks(frameID string, blocks []BlockDSLModel, parentID *string, par
 				Type:        dataItem.Type,
 				Description: dataItem.Description,
 			}
+
+			if newData.Description == nil {
+				emptyDescription := ""
+				newData.Description = &emptyDescription
+			}
+
 			newBlock.Data = append(newBlock.Data, newData)
 		}
 
@@ -167,6 +201,12 @@ func processBlocks(frameID string, blocks []BlockDSLModel, parentID *string, par
 				Slot:        slotItem.Slot,
 				Description: slotItem.Description,
 			}
+
+			if newSlot.Description == nil {
+				emptyDescription := ""
+				newSlot.Description = &emptyDescription
+			}
+
 			newBlock.Slots = append(newBlock.Slots, newSlot)
 		}
 
