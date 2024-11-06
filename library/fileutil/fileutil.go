@@ -24,7 +24,7 @@ func NewFileManager(customDir *string) (*FileManager, error) {
 
 	var baseDir string
 	if customDir != nil {
-		baseDir = filepath.Join(*customDir, ConfigDirName)
+		baseDir = filepath.Join(*customDir)
 	} else {
 		baseDir = filepath.Join(homeDir, ConfigDirName, CliDirName)
 	}
@@ -82,4 +82,12 @@ func (fm *FileManager) FileExists(filename string) bool {
 
 func (fm *FileManager) GetFilePath(filename string) string {
 	return filepath.Join(fm.BaseDir, filename)
+}
+
+func GetFileDir(filePath string) string {
+	return filepath.Dir(filePath)
+}
+
+func GetFileName(filePath string) string {
+	return filepath.Base(filePath)
 }

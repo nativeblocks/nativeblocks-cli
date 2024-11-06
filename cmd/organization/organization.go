@@ -47,7 +47,7 @@ const organizationsQuery = `
   }
 `
 
-func NewOrganizationCmd() *cobra.Command {
+func OrganizationCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "organization",
 		Short: "Manage organizations",

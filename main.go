@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/nativeblocks/cli/cmd/auth"
+	"github.com/nativeblocks/cli/cmd/frame"
 	"github.com/nativeblocks/cli/cmd/organization"
 	"github.com/nativeblocks/cli/cmd/project"
 	"github.com/nativeblocks/cli/cmd/region"
@@ -20,8 +21,9 @@ func main() {
 	rootCmd.AddCommand(
 		region.RegionCmd(),
 		auth.AuthCmd(),
-		organization.NewOrganizationCmd(),
-		project.NewProjectCmd(),
+		organization.OrganizationCmd(),
+		project.ProjectCmd(),
+		frame.FrameCmd(),
 	)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

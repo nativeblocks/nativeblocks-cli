@@ -128,7 +128,7 @@ const installedIntegrationsQuery = `
 	}
 `
 
-func NewProjectCmd() *cobra.Command {
+func ProjectCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "project",
 		Short: "Manage projects",
@@ -274,7 +274,8 @@ func projectSchemaGenCmd() *cobra.Command {
 		Use:   "gen-schema",
 		Short: "Generate a JSON schema file",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			inputFm, err := fileutil.NewFileManager(&directory)
+			finalDir := directory + "./nativeblocks"
+			inputFm, err := fileutil.NewFileManager(&finalDir)
 			if err != nil {
 				return err
 			}
