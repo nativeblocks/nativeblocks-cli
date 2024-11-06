@@ -7,7 +7,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const RegionFileName = "region"
+const (
+	ProjectFileName      = "project"
+	OrganizationFileName = "organization"
+	RegionFileName       = "region"
+	AuthFileName         = "auth"
+)
 
 type RegionConfig struct {
 	URL string `json:"url"`
@@ -35,6 +40,11 @@ func regionSetCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
+
+			fm.DeleteFile(RegionFileName)
+			fm.DeleteFile(AuthFileName)
+			fm.DeleteFile(OrganizationFileName)
+			fm.DeleteFile(ProjectFileName)
 
 			config := RegionConfig{URL: args[0]}
 			if err := fm.SaveToFile(RegionFileName, config); err != nil {
