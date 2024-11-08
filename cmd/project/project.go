@@ -187,18 +187,16 @@ func projectSchemaGenCmd() *cobra.Command {
 			} else {
 				blockExist := inputFm.FileExists("integrations/block")
 				if blockExist {
-					blockKeyTypes = FindKeyTypes(inputFm.BaseDir + "/integrations/block")
-					blockProperties = FindProperties(inputFm.BaseDir + "/integrations/block")
-					blockData = FindData(inputFm.BaseDir + "/integrations/block")
+					blockKeyTypes = findKeyTypes(inputFm.BaseDir + "/integrations/block")
+					blockProperties = findProperties(inputFm.BaseDir + "/integrations/block")
+					blockData = findData(inputFm.BaseDir + "/integrations/block")
 				}
-
 				actionExist := inputFm.FileExists("integrations/action")
 				if actionExist {
-					actionKeyTypes = FindKeyTypes(inputFm.BaseDir + "/integrations/action")
-					actionProperties = FindProperties(inputFm.BaseDir + "/integrations/action")
-					actionData = FindData(inputFm.BaseDir + "/integrations/action")
+					actionKeyTypes = findKeyTypes(inputFm.BaseDir + "/integrations/action")
+					actionProperties = findProperties(inputFm.BaseDir + "/integrations/action")
+					actionData = findData(inputFm.BaseDir + "/integrations/action")
 				}
-
 				blockKeyTypes = append(blockKeyTypes, "ROOT")
 			}
 
