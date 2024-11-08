@@ -1,51 +1,14 @@
 package organization
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
+	auth "github.com/nativeblocks/cli/cmd/auth"
+	region "github.com/nativeblocks/cli/cmd/region"
 	"github.com/nativeblocks/cli/library/fileutil"
-	"github.com/nativeblocks/cli/library/graphqlutil"
 	"github.com/spf13/cobra"
 )
-
-const (
-	OrgFileName    = "organization"
-	RegionFileName = "region"
-	AuthFileName   = "auth"
-)
-
-type Organization struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
-
-type OrganizationConfig struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
-
-type RegionConfig struct {
-	URL string `json:"url"`
-}
-
-type AuthConfig struct {
-	AccessToken string `json:"accessToken"`
-}
-
-type OrganizationsResponse struct {
-	Organizations []Organization `json:"organizations"`
-}
-
-const organizationsQuery = `
-  query organizations {
-    organizations {
-      id
-      name
-    }
-  }
-`
 
 func OrganizationCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -68,51 +31,27 @@ func organizationListCmd() *cobra.Command {
 				return err
 			}
 
-			var regionConfig RegionConfig
-			if err := fm.LoadFromFile(RegionFileName, &regionConfig); err != nil {
-				return fmt.Errorf("region not set. Please set region first using 'nativeblocks region set <url>'")
-			}
-
-			var authConfig AuthConfig
-			if err := fm.LoadFromFile(AuthFileName, &authConfig); err != nil {
-				return fmt.Errorf("not authenticated. Please login first using 'nativeblocks auth'")
-			}
-
-			client := graphqlutil.NewClient()
-
-			headers := map[string]string{
-				"Authorization": "Bearer " + authConfig.AccessToken,
-			}
-
-			resp, err := client.Execute(
-				regionConfig.URL,
-				headers,
-				organizationsQuery,
-				nil,
-			)
+			var regionModel region.RegionModel
+			region, err := regionModel.GetRegion(*fm)
 			if err != nil {
-				return fmt.Errorf("failed to fetch organizations: %v", err)
+				return nil
 			}
 
-			responseData, err := json.Marshal(resp.Data)
+			var authModel auth.AuthModel
+			auth, err := authModel.AuthGet(*fm)
 			if err != nil {
-				return fmt.Errorf("failed to process response: %v", err)
+				return nil
 			}
 
-			var orgResp OrganizationsResponse
-			if err := json.Unmarshal(responseData, &orgResp); err != nil {
-				fmt.Printf("Debug - Raw response: %s\n", string(responseData))
-				return fmt.Errorf("failed to parse organizations response: %v", err)
-			}
-
-			if len(orgResp.Organizations) == 0 {
-				return fmt.Errorf("no organizations found")
+			orgs, err := GetOrganizations(*fm, region.Url, auth.AccessToken)
+			if err != nil {
+				return nil
 			}
 
 			var options []string
-			optionMap := make(map[string]Organization)
+			optionMap := make(map[string]OrganizationModel)
 
-			for _, org := range orgResp.Organizations {
+			for _, org := range orgs {
 				optionText := fmt.Sprintf("%s (%s)", org.Name, org.Id)
 				options = append(options, optionText)
 				optionMap[optionText] = org
@@ -129,14 +68,11 @@ func organizationListCmd() *cobra.Command {
 			}
 
 			selectedOrg := optionMap[selection]
-			orgConfig := OrganizationConfig{
+			orgModel := OrganizationModel{
 				Id:   selectedOrg.Id,
 				Name: selectedOrg.Name,
 			}
-
-			if err := fm.SaveToFile(OrgFileName, orgConfig); err != nil {
-				return fmt.Errorf("failed to save organization config: %v", err)
-			}
+			SelectOrganization(fm, &orgModel)
 
 			fmt.Printf("Selected organization: %s (%s)\n", selectedOrg.Name, selectedOrg.Id)
 			return nil
@@ -154,12 +90,13 @@ func organizationGetCmd() *cobra.Command {
 				return err
 			}
 
-			var config OrganizationConfig
-			if err := fm.LoadFromFile(OrgFileName, &config); err != nil {
-				return err
+			var organizationModel OrganizationModel
+			organization, err := organizationModel.GetOrganization(*fm)
+			if err != nil {
+				return nil
 			}
 
-			fmt.Printf("Current organization: %s \n", config.Name)
+			fmt.Printf("Current organization: %s \n", organization.Name)
 			return nil
 		},
 	}

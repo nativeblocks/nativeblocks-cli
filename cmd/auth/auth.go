@@ -3,7 +3,7 @@ package auth
 import (
 	"fmt"
 
-	regionModel "github.com/nativeblocks/cli/cmd/region/model"
+	region "github.com/nativeblocks/cli/cmd/region"
 	"github.com/nativeblocks/cli/library/fileutil"
 	"github.com/spf13/cobra"
 )
@@ -20,13 +20,13 @@ func AuthCmd() *cobra.Command {
 				return err
 			}
 
-			var regionModel regionModel.RegionModel
-			region, err := regionModel.RegionGet(*fm)
+			var regionModel region.RegionModel
+			region, err := regionModel.GetRegion(*fm)
 			if err != nil {
 				return nil
 			}
 
-			authModel, err := Authenticate(*fm, region.URL, username, password)
+			authModel, err := Authenticate(*fm, region.Url, username, password)
 			if err != nil {
 				return err
 			}

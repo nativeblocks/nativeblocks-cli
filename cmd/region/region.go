@@ -3,7 +3,6 @@ package region
 import (
 	"fmt"
 
-	regionModel "github.com/nativeblocks/cli/cmd/region/model"
 	"github.com/nativeblocks/cli/library/fileutil"
 	"github.com/spf13/cobra"
 )
@@ -43,7 +42,7 @@ func regionSetCmd() *cobra.Command {
 			fm.DeleteFile(OrganizationFileName)
 			fm.DeleteFile(ProjectFileName)
 
-			config := regionModel.RegionModel{URL: args[0]}
+			config := RegionModel{Url: args[0]}
 			if err := fm.SaveToFile(RegionFileName, config); err != nil {
 				return err
 			}
@@ -64,12 +63,12 @@ func regionGetCmd() *cobra.Command {
 				return err
 			}
 
-			var region regionModel.RegionModel
-			model, err := region.RegionGet(*fm)
+			var region RegionModel
+			model, err := region.GetRegion(*fm)
 			if err != nil {
 				return nil
 			}
-			fmt.Printf("Current region URL: %s\n", model.URL)
+			fmt.Printf("Current region URL: %s\n", model.Url)
 
 			return nil
 		},

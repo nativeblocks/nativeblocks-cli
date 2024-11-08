@@ -7,6 +7,8 @@ import (
 	"github.com/nativeblocks/cli/library/graphqlutil"
 )
 
+const authCacheFileName = "auth"
+
 const authLoginMutation = `
   mutation authLogin($email: String!, $password: String!) {
     authLogin(email: $email, password: $password) {
@@ -49,7 +51,7 @@ func Authenticate(fm fileutil.FileManager, regionUrl, username, password string)
 		Email:       authResponse.AuthLogin.Email,
 	}
 
-	if err := fm.SaveToFile(AuthFileName, authConfig); err != nil {
+	if err := fm.SaveToFile(authCacheFileName, authConfig); err != nil {
 		return nil, fmt.Errorf("failed to save auth config: %v", err)
 	}
 
@@ -58,7 +60,7 @@ func Authenticate(fm fileutil.FileManager, regionUrl, username, password string)
 
 func (authModel *AuthModel) AuthGet(fm fileutil.FileManager) (*AuthModel, error) {
 	var model AuthModel
-	if err := fm.LoadFromFile(AuthFileName, &model); err != nil {
+	if err := fm.LoadFromFile(authCacheFileName, &model); err != nil {
 		return nil, fmt.Errorf("not authenticated. Please login first using 'nativeblocks auth'")
 	}
 	return &model, nil

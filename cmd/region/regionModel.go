@@ -1,4 +1,4 @@
-package model
+package region
 
 import (
 	"fmt"
@@ -6,15 +6,15 @@ import (
 	"github.com/nativeblocks/cli/library/fileutil"
 )
 
-const RegionFileName = "region"
+const regionFileName = "region"
 
 type RegionModel struct {
-	URL string `json:"url"`
+	Url string `json:"url"`
 }
 
-func (regionModel *RegionModel) RegionGet(fm fileutil.FileManager) (*RegionModel, error) {
+func (regionModel *RegionModel) GetRegion(fm fileutil.FileManager) (*RegionModel, error) {
 	var model RegionModel
-	if err := fm.LoadFromFile(RegionFileName, &model); err != nil {
+	if err := fm.LoadFromFile(regionFileName, &model); err != nil {
 		return nil, fmt.Errorf("region not set. Please set region first using 'nativeblocks region set <url>'")
 	}
 	return &model, nil
