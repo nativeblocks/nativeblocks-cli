@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/nativeblocks/cli/library/fileutil"
 	"github.com/nativeblocks/cli/library/graphqlutil"
@@ -33,7 +33,7 @@ func Authenticate(fm fileutil.FileManager, regionUrl, username, password string)
 		variables,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("authentication failed: %v", err)
+		return nil, errors.New("authentication failed: " + err.Error())
 	}
 
 	var authResponse AuthResponse
@@ -43,7 +43,7 @@ func Authenticate(fm fileutil.FileManager, regionUrl, username, password string)
 	}
 
 	if authResponse.AuthLogin.AccessToken == "" {
-		return nil, fmt.Errorf("no access token received in response")
+		return nil, errors.New("no access token received in response")
 	}
 
 	authConfig := AuthModel{
@@ -52,7 +52,7 @@ func Authenticate(fm fileutil.FileManager, regionUrl, username, password string)
 	}
 
 	if err := fm.SaveToFile(authCacheFileName, authConfig); err != nil {
-		return nil, fmt.Errorf("failed to save auth config: %v", err)
+		return nil, errors.New("failed to save auth config: " + err.Error())
 	}
 
 	return &authConfig, nil
@@ -61,7 +61,7 @@ func Authenticate(fm fileutil.FileManager, regionUrl, username, password string)
 func AuthGet(fm fileutil.FileManager) (*AuthModel, error) {
 	var model AuthModel
 	if err := fm.LoadFromFile(authCacheFileName, &model); err != nil {
-		return nil, fmt.Errorf("not authenticated. Please login first using 'nativeblocks auth'")
+		return nil, errors.New("not authenticated. Please login first using 'nativeblocks auth'")
 	}
 	return &model, nil
 }

@@ -68,7 +68,7 @@ func (c *Client) Execute(url string, headers map[string]string, query string, va
 	}
 
 	if len(graphQLResp.Errors) > 0 {
-		return nil, fmt.Errorf("GraphQL error: %s", graphQLResp.Errors[0].Message)
+		return nil, fmt.Errorf("%s", graphQLResp.Errors[0].Message)
 	}
 
 	return &graphQLResp, nil

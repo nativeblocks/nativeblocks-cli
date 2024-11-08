@@ -1,6 +1,7 @@
 package organization
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -16,15 +17,15 @@ func OrganizationCmd() *cobra.Command {
 		Short: "Manage organizations",
 	}
 
-	cmd.AddCommand(organizationListCmd())
+	cmd.AddCommand(organizationSetCmd())
 	cmd.AddCommand(organizationGetCmd())
 	return cmd
 }
 
-func organizationListCmd() *cobra.Command {
+func organizationSetCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "list",
-		Short: "List and select an organization",
+		Use:   "set",
+		Short: "Select an organization",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			fm, err := fileutil.NewFileManager(nil)
 			if err != nil {
@@ -62,15 +63,11 @@ func organizationListCmd() *cobra.Command {
 			}
 
 			if err := survey.AskOne(prompt, &selection); err != nil {
-				return fmt.Errorf("selection cancelled: %v", err)
+				return errors.New("selection cancelled: " + err.Error())
 			}
 
 			selectedOrg := optionMap[selection]
-			orgModel := OrganizationModel{
-				Id:   selectedOrg.Id,
-				Name: selectedOrg.Name,
-			}
-			SelectOrganization(fm, &orgModel)
+			SelectOrganization(fm, &selectedOrg)
 
 			fmt.Printf("Selected organization: %s (%s)\n", selectedOrg.Name, selectedOrg.Id)
 			return nil

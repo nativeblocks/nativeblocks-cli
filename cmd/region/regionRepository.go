@@ -1,7 +1,7 @@
 package region
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/nativeblocks/cli/library/fileutil"
 )
@@ -11,7 +11,7 @@ const regionFileName = "region"
 func GetRegion(fm fileutil.FileManager) (*RegionModel, error) {
 	var model RegionModel
 	if err := fm.LoadFromFile(regionFileName, &model); err != nil {
-		return nil, fmt.Errorf("region not set. Please set region first using 'nativeblocks region set <url>'")
+		return nil, errors.New("region not set. Please set region first using 'nativeblocks region set <url>'")
 	}
 	return &model, nil
 }

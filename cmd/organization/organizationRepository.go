@@ -1,7 +1,7 @@
 package organization
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/nativeblocks/cli/library/fileutil"
 	"github.com/nativeblocks/cli/library/graphqlutil"
@@ -32,7 +32,7 @@ func GetOrganizations(fm fileutil.FileManager, regionUrl, accessToken string) ([
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch organizations: %v", err)
+		return nil, errors.New("failed to fetch organizations: " + err.Error())
 	}
 
 	var orgResp OrganizationsResponse
@@ -42,7 +42,7 @@ func GetOrganizations(fm fileutil.FileManager, regionUrl, accessToken string) ([
 	}
 
 	if len(orgResp.Organizations) == 0 {
-		return nil, fmt.Errorf("no organizations found")
+		return nil, errors.New("no organizations found")
 	}
 	orgs := mapResponseToModel(orgResp)
 	return orgs, nil
@@ -50,7 +50,7 @@ func GetOrganizations(fm fileutil.FileManager, regionUrl, accessToken string) ([
 
 func SelectOrganization(fm *fileutil.FileManager, orgModel *OrganizationModel) error {
 	if err := fm.SaveToFile(orgFileName, orgModel); err != nil {
-		return fmt.Errorf("failed to save organization config: %v", err)
+		return errors.New("failed to save organization config: " + err.Error())
 	}
 	return nil
 }
@@ -58,7 +58,7 @@ func SelectOrganization(fm *fileutil.FileManager, orgModel *OrganizationModel) e
 func GetOrganization(fm fileutil.FileManager) (*OrganizationModel, error) {
 	var model OrganizationModel
 	if err := fm.LoadFromFile(orgFileName, &model); err != nil {
-		return nil, fmt.Errorf("organization not set. Please select an organization first using 'nativeblocks organization list'")
+		return nil, errors.New("organization not set. Please select an organization first using 'nativeblocks organization set'")
 	}
 	return &model, nil
 }
