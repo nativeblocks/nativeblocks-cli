@@ -73,3 +73,15 @@ func (c *Client) Execute(url string, headers map[string]string, query string, va
 
 	return &graphQLResp, nil
 }
+
+func Parse(resp *GraphQLResponse, data interface{}) error {
+	responseData, err := json.Marshal(resp.Data)
+	if err != nil {
+		return fmt.Errorf("failed to process response: %v", err)
+	}
+	if err := json.Unmarshal(responseData, &data); err != nil {
+		fmt.Printf("Debug - Raw response: %s\n", string(responseData))
+		return fmt.Errorf("failed to parse auth response: %v", err)
+	}
+	return nil
+}
