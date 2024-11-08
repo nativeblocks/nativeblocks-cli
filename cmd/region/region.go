@@ -37,15 +37,7 @@ func regionSetCmd() *cobra.Command {
 				return err
 			}
 
-			fm.DeleteFile(RegionFileName)
-			fm.DeleteFile(AuthFileName)
-			fm.DeleteFile(OrganizationFileName)
-			fm.DeleteFile(ProjectFileName)
-
-			config := RegionModel{Url: args[0]}
-			if err := fm.SaveToFile(RegionFileName, config); err != nil {
-				return err
-			}
+			SetRegion(*fm, args[0])
 
 			fmt.Printf("Region URL set to: %s\n", args[0])
 			return nil
@@ -63,12 +55,11 @@ func regionGetCmd() *cobra.Command {
 				return err
 			}
 
-			var region RegionModel
-			model, err := region.GetRegion(*fm)
+			region, err := GetRegion(*fm)
 			if err != nil {
-				return nil
+				return err
 			}
-			fmt.Printf("Current region URL: %s\n", model.Url)
+			fmt.Printf("Current region URL: %s\n", region.Url)
 
 			return nil
 		},

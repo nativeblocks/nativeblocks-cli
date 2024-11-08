@@ -20,10 +20,9 @@ func AuthCmd() *cobra.Command {
 				return err
 			}
 
-			var regionModel region.RegionModel
-			region, err := regionModel.GetRegion(*fm)
+			region, err := region.GetRegion(*fm)
 			if err != nil {
-				return nil
+				return err
 			}
 
 			authModel, err := Authenticate(*fm, region.Url, username, password)

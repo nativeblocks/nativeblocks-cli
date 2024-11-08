@@ -55,7 +55,7 @@ func SelectOrganization(fm *fileutil.FileManager, orgModel *OrganizationModel) e
 	return nil
 }
 
-func (organizationModel *OrganizationModel) GetOrganization(fm fileutil.FileManager) (*OrganizationModel, error) {
+func GetOrganization(fm fileutil.FileManager) (*OrganizationModel, error) {
 	var model OrganizationModel
 	if err := fm.LoadFromFile(orgFileName, &model); err != nil {
 		return nil, fmt.Errorf("organization not set. Please select an organization first using 'nativeblocks organization list'")

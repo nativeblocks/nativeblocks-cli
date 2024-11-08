@@ -58,7 +58,7 @@ func Authenticate(fm fileutil.FileManager, regionUrl, username, password string)
 	return &authConfig, nil
 }
 
-func (authModel *AuthModel) AuthGet(fm fileutil.FileManager) (*AuthModel, error) {
+func AuthGet(fm fileutil.FileManager) (*AuthModel, error) {
 	var model AuthModel
 	if err := fm.LoadFromFile(authCacheFileName, &model); err != nil {
 		return nil, fmt.Errorf("not authenticated. Please login first using 'nativeblocks auth'")

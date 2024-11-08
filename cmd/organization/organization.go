@@ -31,21 +31,19 @@ func organizationListCmd() *cobra.Command {
 				return err
 			}
 
-			var regionModel region.RegionModel
-			region, err := regionModel.GetRegion(*fm)
+			region, err := region.GetRegion(*fm)
 			if err != nil {
-				return nil
+				return err
 			}
 
-			var authModel auth.AuthModel
-			auth, err := authModel.AuthGet(*fm)
+			auth, err := auth.AuthGet(*fm)
 			if err != nil {
-				return nil
+				return err
 			}
 
 			orgs, err := GetOrganizations(*fm, region.Url, auth.AccessToken)
 			if err != nil {
-				return nil
+				return err
 			}
 
 			var options []string
@@ -90,10 +88,9 @@ func organizationGetCmd() *cobra.Command {
 				return err
 			}
 
-			var organizationModel OrganizationModel
-			organization, err := organizationModel.GetOrganization(*fm)
+			organization, err := GetOrganization(*fm)
 			if err != nil {
-				return nil
+				return err
 			}
 
 			fmt.Printf("Current organization: %s \n", organization.Name)
