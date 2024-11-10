@@ -39,10 +39,7 @@ type Trigger struct {
 	Triggers           []Trigger        `json:"triggers"`
 }
 
-func generateBaseSchema(
-	blockKeyTypes, actionKeyTypes []string,
-	blockProperties, blockData, actionProperties, actionData []MetaItem,
-) (Schema, error) {
+func generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockData, actionProperties, actionData []string) (Schema, error) {
 	baseSchema := Schema{
 		Schema:   "http://json-schema.org/draft-07/schema#",
 		Type:     "object",
@@ -326,8 +323,8 @@ func findKeyTypes(dirPath string) []string {
 	return keyTypes
 }
 
-func findData(dirPath string) []MetaItem {
-	var data []MetaItem
+func findData(dirPath string) []string {
+	var data []string
 	walkFunc := func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -350,12 +347,8 @@ func findData(dirPath string) []MetaItem {
 
 			for _, item := range jsonData {
 				key, _ := item["key"].(string)
-				dataType, _ := item["type"].(string)
-				data = append(data, MetaItem{
-					Key:   key,
-					Value: "",
-					Type:  dataType,
-				})
+				// dataType, _ := item[`type`].(string)
+				data = append(data, key)
 			}
 		}
 
@@ -371,8 +364,8 @@ func findData(dirPath string) []MetaItem {
 	return data
 }
 
-func findProperties(dirPath string) []MetaItem {
-	var properties []MetaItem
+func findProperties(dirPath string) []string {
+	var properties []string
 	walkFunc := func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -395,13 +388,9 @@ func findProperties(dirPath string) []MetaItem {
 
 			for _, item := range jsonData {
 				key, _ := item["key"].(string)
-				value, _ := item["value"].(string)
-				dataType, _ := item["type"].(string)
-				properties = append(properties, MetaItem{
-					Key:   key,
-					Value: value,
-					Type:  dataType,
-				})
+				// value, _ := item["value"].(string)
+				// dataType, _ := item["type"].(string)
+				properties = append(properties, key)
 			}
 		}
 

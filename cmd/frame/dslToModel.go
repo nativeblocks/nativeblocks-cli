@@ -8,19 +8,19 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-func processActions(frameID, key string, inputActions []ActionDSLModel, variables []VariableModel) ([]ActionModel, error) {
+func processActions(frameId, key string, inputActions []ActionDSLModel, variables []VariableModel) ([]ActionModel, error) {
 	var actions []ActionModel
 
 	for _, inputAction := range inputActions {
-		actionID := generateId()
-		subTriggers, err := processTriggers(actionID, inputAction.Triggers, nil, variables)
+		actionId := generateId()
+		subTriggers, err := processTriggers(actionId, inputAction.Triggers, "", variables)
 		if err != nil {
 			return nil, err
 		}
 
 		newAction := ActionModel{
-			ID:       actionID,
-			FrameID:  frameID,
+			Id:       actionId,
+			FrameId:  frameId,
 			Key:      key,
 			Event:    inputAction.Event,
 			Triggers: subTriggers,
@@ -31,14 +31,14 @@ func processActions(frameID, key string, inputActions []ActionDSLModel, variable
 	return actions, nil
 }
 
-func processTriggers(actionID string, triggers []ActionTriggerDSLModel, parentID *string, variables []VariableModel) ([]ActionTriggerModel, error) {
+func processTriggers(actionId string, triggers []ActionTriggerDSLModel, parentId string, variables []VariableModel) ([]ActionTriggerModel, error) {
 	var flatTriggers []ActionTriggerModel
 
 	for _, trigger := range triggers {
 		newTrigger := ActionTriggerModel{
-			ID:                 generateId(),
-			ActionID:           actionID,
-			ParentID:           parentID,
+			Id:                 generateId(),
+			ActionId:           actionId,
+			ParentId:           parentId,
 			KeyType:            trigger.KeyType,
 			Then:               trigger.Then,
 			Name:               trigger.Name,
@@ -47,15 +47,15 @@ func processTriggers(actionID string, triggers []ActionTriggerDSLModel, parentID
 			Data:               []TriggerDataModel{},
 		}
 
-		if newTrigger.ParentID == nil {
-			emptyParentID := ""
-			newTrigger.ParentID = &emptyParentID
+		if newTrigger.ParentId == "" {
+			emptyParentId := ""
+			newTrigger.ParentId = emptyParentId
 		}
 
 		for _, property := range trigger.Properties {
 			newProperty := TriggerPropertyModel{
-				ID:                 generateId(),
-				ActionTriggerID:    newTrigger.ID,
+				Id:                 generateId(),
+				ActionTriggerId:    newTrigger.Id,
 				Key:                property.Key,
 				Type:               property.Type,
 				Value:              property.Value,
@@ -65,9 +65,9 @@ func processTriggers(actionID string, triggers []ActionTriggerDSLModel, parentID
 				ValuePickerOptions: property.ValuePickerOptions,
 			}
 
-			if newProperty.Description == nil {
+			if newProperty.Description == "" {
 				emptyDescription := ""
-				newProperty.Description = &emptyDescription
+				newProperty.Description = emptyDescription
 			}
 
 			newTrigger.Properties = append(newTrigger.Properties, newProperty)
@@ -75,39 +75,31 @@ func processTriggers(actionID string, triggers []ActionTriggerDSLModel, parentID
 
 		for _, dataItem := range trigger.Data {
 			newData := TriggerDataModel{
-				ID:              generateId(),
-				ActionTriggerID: newTrigger.ID,
+				Id:              generateId(),
+				ActionTriggerId: newTrigger.Id,
 				Key:             dataItem.Key,
 				Value:           dataItem.Value,
 				Type:            dataItem.Type,
 				Description:     dataItem.Description,
 			}
 
-			if newData.Description == nil {
+			if newData.Description == "" {
 				emptyDescription := ""
-				newData.Description = &emptyDescription
+				newData.Description = emptyDescription
 			}
 
 			newTrigger.Data = append(newTrigger.Data, newData)
 		}
 
-		for i, dataEntry := range newTrigger.Data {
-			for _, variable := range variables {
-				if variable.Key == dataEntry.Value {
-					newTrigger.Data[i].Value = variable.Key
-					newTrigger.Data[i].Type = variable.Type
-					break
-				} else {
-					return nil, errors.New("Variable with key '" + dataEntry.Value + "' not found")
-					break
-				}
-			}
+		err := findTriggerVariable(variables, newTrigger.Data)
+		if err != nil {
+			return nil, err
 		}
 
 		flatTriggers = append(flatTriggers, newTrigger)
 
 		if len(trigger.Triggers) > 0 {
-			subTriggers, err := processTriggers(actionID, trigger.Triggers, &newTrigger.ID, variables)
+			subTriggers, err := processTriggers(actionId, trigger.Triggers, newTrigger.Id, variables)
 			if err != nil {
 				return nil, err
 			}
@@ -122,41 +114,41 @@ func processTriggers(actionID string, triggers []ActionTriggerDSLModel, parentID
 	return flatTriggers, nil
 }
 
-func processBlocks(frameID string, blocks []BlockDSLModel, parentID *string, parentSlots []BlockSlotModel, variables []VariableModel, onNewAction func([]ActionModel, error)) ([]BlockModel, error) {
+func processBlocks(frameId string, blocks []BlockDSLModel, parentId string, parentSlots []BlockSlotModel, variables []VariableModel, onNewAction func([]ActionModel, error)) ([]BlockModel, error) {
 	var flatBlocks []BlockModel
 
 	for index, block := range blocks {
 		newBlock := BlockModel{
-			ID:                 generateId(),
-			FrameID:            frameID,
+			Id:                 generateId(),
+			FrameId:            frameId,
 			KeyType:            block.KeyType,
 			Key:                block.Key,
 			VisibilityKey:      block.VisibilityKey,
 			Position:           index,
 			Slot:               block.Slot,
 			IntegrationVersion: block.IntegrationVersion,
-			ParentID:           parentID,
+			ParentId:           parentId,
 			Data:               []BlockDataModel{},
 			Properties:         []BlockPropertyModel{},
 			Slots:              []BlockSlotModel{},
 		}
 
-		if newBlock.Slot == nil {
+		if newBlock.Slot == "" {
 			contentSlot := "content"
-			newBlock.Slot = &contentSlot
+			newBlock.Slot = contentSlot
 		}
 
-		if newBlock.ParentID == nil {
-			emptyParentID := ""
-			newBlock.ParentID = &emptyParentID
+		if newBlock.ParentId == "" {
+			emptyParentId := ""
+			newBlock.ParentId = emptyParentId
 		}
 
-		onNewAction(processActions(frameID, block.Key, block.Actions, variables))
+		onNewAction(processActions(frameId, block.Key, block.Actions, variables))
 
 		for _, property := range block.Properties {
 			newProperty := BlockPropertyModel{
-				ID:                 generateId(),
-				BlockID:            newBlock.ID,
+				Id:                 generateId(),
+				BlockId:            newBlock.Id,
 				Key:                property.Key,
 				Type:               property.Type,
 				ValueMobile:        property.ValueMobile,
@@ -168,9 +160,9 @@ func processBlocks(frameID string, blocks []BlockDSLModel, parentID *string, par
 				ValuePickerOptions: property.ValuePickerOptions,
 			}
 
-			if newProperty.Description == nil {
+			if newProperty.Description == "" {
 				emptyDescription := ""
-				newProperty.Description = &emptyDescription
+				newProperty.Description = emptyDescription
 			}
 
 			newBlock.Properties = append(newBlock.Properties, newProperty)
@@ -178,17 +170,17 @@ func processBlocks(frameID string, blocks []BlockDSLModel, parentID *string, par
 
 		for _, dataItem := range block.Data {
 			newData := BlockDataModel{
-				ID:          generateId(),
-				BlockID:     newBlock.ID,
+				Id:          generateId(),
+				BlockId:     newBlock.Id,
 				Key:         dataItem.Key,
 				Value:       dataItem.Value,
 				Type:        dataItem.Type,
 				Description: dataItem.Description,
 			}
 
-			if newData.Description == nil {
+			if newData.Description == "" {
 				emptyDescription := ""
-				newData.Description = &emptyDescription
+				newData.Description = emptyDescription
 			}
 
 			newBlock.Data = append(newBlock.Data, newData)
@@ -196,37 +188,29 @@ func processBlocks(frameID string, blocks []BlockDSLModel, parentID *string, par
 
 		for _, slotItem := range block.Slots {
 			newSlot := BlockSlotModel{
-				ID:          generateId(),
-				BlockID:     newBlock.ID,
+				Id:          generateId(),
+				BlockId:     newBlock.Id,
 				Slot:        slotItem.Slot,
 				Description: slotItem.Description,
 			}
 
-			if newSlot.Description == nil {
+			if newSlot.Description == "" {
 				emptyDescription := ""
-				newSlot.Description = &emptyDescription
+				newSlot.Description = emptyDescription
 			}
 
 			newBlock.Slots = append(newBlock.Slots, newSlot)
 		}
 
-		for _, dataEntry := range newBlock.Data {
-			for _, variable := range variables {
-				if variable.Key == dataEntry.Value {
-					dataEntry.Value = variable.Key
-					dataEntry.Type = variable.Type
-					break
-				} else {
-					return nil, errors.New("Variable with key '" + dataEntry.Value + "' not found")
-					break
-				}
-			}
+		err := findBlockVariable(variables, newBlock.Data)
+		if err != nil {
+			return nil, err
 		}
 
 		flatBlocks = append(flatBlocks, newBlock)
 
 		if len(block.Blocks) > 0 {
-			subBlocks, err := processBlocks(frameID, block.Blocks, &newBlock.ID, newBlock.Slots, variables, onNewAction)
+			subBlocks, err := processBlocks(frameId, block.Blocks, newBlock.Id, newBlock.Slots, variables, onNewAction)
 			if err != nil {
 				return nil, err
 			}
@@ -260,9 +244,9 @@ func convertRouteArguments(route string) []RouteArgument {
 	return routeArguments
 }
 
-func generateFrame(frameDSL FrameDSLModel) (FrameModel, error) {
+func generateFrame(frameDSL FrameDSLModel) (FrameProductionDataWrapper, error) {
 	if frameDSL.Schema == "" {
-		return FrameModel{}, errors.New("Please provide $schema for the json file")
+		return FrameProductionDataWrapper{}, errors.New("please provide $schema for the json file")
 	}
 
 	schemaLoader := gojsonschema.NewReferenceLoader(frameDSL.Schema)
@@ -270,23 +254,23 @@ func generateFrame(frameDSL FrameDSLModel) (FrameModel, error) {
 
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 	if err != nil {
-		return FrameModel{}, err
+		return FrameProductionDataWrapper{}, err
 	}
 
 	if !result.Valid() {
 		for _, errz := range result.Errors() {
 			fmt.Printf("- %s\n", errz)
 		}
-		return FrameModel{}, nil
+		return FrameProductionDataWrapper{}, nil
 	}
 
-	frameID := generateId()
+	frameId := generateId()
 
 	var variables []VariableModel
 	for _, variable := range frameDSL.Variables {
 		variables = append(variables, VariableModel{
-			ID:      generateId(),
-			FrameID: frameID,
+			Id:      generateId(),
+			FrameId: frameId,
 			Key:     variable.Key,
 			Value:   variable.Value,
 			Type:    variable.Type,
@@ -294,12 +278,12 @@ func generateFrame(frameDSL FrameDSLModel) (FrameModel, error) {
 	}
 
 	var actions []ActionModel
-	blocks, err := processBlocks(frameID, frameDSL.Blocks, nil, []BlockSlotModel{}, variables, func(blockActions []ActionModel, err error) {
+	blocks, err := processBlocks(frameId, frameDSL.Blocks, "", []BlockSlotModel{}, variables, func(blockActions []ActionModel, err error) {
 		actions = append(actions, blockActions...)
 	})
 
 	frame := FrameModel{
-		ID:             frameID,
+		Id:             frameId,
 		Name:           frameDSL.Name,
 		Route:          frameDSL.Route,
 		RouteArguments: convertRouteArguments(frameDSL.Route),
@@ -316,5 +300,43 @@ func generateFrame(frameDSL FrameDSLModel) (FrameModel, error) {
 	if frame.Blocks == nil {
 		frame.Blocks = []BlockModel{}
 	}
-	return frame, err
+	production := FrameProductionWrapper{
+		FrameProduction: frame,
+	}
+	wrapper := FrameProductionDataWrapper{
+		Data: production,
+	}
+	return wrapper, err
+}
+
+func findBlockVariable(variables []VariableModel, data []BlockDataModel) error {
+	for _, dataEntry := range data {
+		found := false
+		for _, variable := range variables {
+			if variable.Key == dataEntry.Value {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return fmt.Errorf("no matching variable found for data entry with value: %s", dataEntry.Value)
+		}
+	}
+	return nil
+}
+
+func findTriggerVariable(variables []VariableModel, data []TriggerDataModel) error {
+	for _, dataEntry := range data {
+		found := false
+		for _, variable := range variables {
+			if variable.Key == dataEntry.Value {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return fmt.Errorf("no matching variable found for data entry with value: %s", dataEntry.Value)
+		}
+	}
+	return nil
 }

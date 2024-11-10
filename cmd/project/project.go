@@ -119,12 +119,12 @@ func projectSchemaGenCmd() *cobra.Command {
 				return err
 			}
 			blockKeyTypes := make([]string, 0)
-			blockProperties := make([]MetaItem, 0)
-			blockData := make([]MetaItem, 0)
+			blockProperties := make([]string, 0)
+			blockData := make([]string, 0)
 
 			actionKeyTypes := make([]string, 0)
-			actionProperties := make([]MetaItem, 0)
-			actionData := make([]MetaItem, 0)
+			actionProperties := make([]string, 0)
+			actionData := make([]string, 0)
 
 			if edition == "cloud" || edition == "Cloud" || edition == "CLOUD" {
 				fm, err := fileutil.NewFileManager(nil)
@@ -160,11 +160,11 @@ func projectSchemaGenCmd() *cobra.Command {
 					blockKeyTypes = append(blockKeyTypes, installedIntegration.IntegrationKeyType)
 					for _, property := range installedIntegration.IntegrationProperties {
 						meta := MetaItem(property)
-						blockProperties = append(blockProperties, meta)
+						blockProperties = append(blockProperties, meta.Key)
 					}
 					for _, dataItem := range installedIntegration.IntegrationData {
 						meta := MetaItem{Key: dataItem.Key, Value: "", Type: dataItem.Type}
-						blockData = append(blockData, meta)
+						blockData = append(blockData, meta.Key)
 					}
 				}
 
@@ -177,11 +177,11 @@ func projectSchemaGenCmd() *cobra.Command {
 					actionKeyTypes = append(actionKeyTypes, installedIntegration.IntegrationKeyType)
 					for _, property := range installedIntegration.IntegrationProperties {
 						meta := MetaItem(property)
-						actionProperties = append(actionProperties, meta)
+						actionProperties = append(actionProperties, meta.Key)
 					}
 					for _, dataItem := range installedIntegration.IntegrationData {
 						meta := MetaItem{Key: dataItem.Key, Value: "", Type: dataItem.Type}
-						actionData = append(actionData, meta)
+						actionData = append(actionData, meta.Key)
 					}
 				}
 			} else {

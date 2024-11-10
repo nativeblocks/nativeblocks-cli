@@ -19,7 +19,7 @@ type FrameDSLModel struct {
 }
 
 type VariableDSLModel struct {
-	FrameID string `json:"frameId"`
+	FrameId string `json:"frameId"`
 	Key     string `json:"key"`
 	Value   string `json:"value"`
 	Type    string `json:"type"`
@@ -29,7 +29,7 @@ type BlockDSLModel struct {
 	KeyType            string                  `json:"keyType"`
 	Key                string                  `json:"key"`
 	VisibilityKey      string                  `json:"visibilityKey"`
-	Slot               *string                 `json:"slot,omitempty"`
+	Slot               string                  `json:"slot,omitempty"`
 	IntegrationVersion int                     `json:"integrationVersion"`
 	Blocks             []BlockDSLModel         `json:"blocks"`
 	Data               []BlockDataDSLModel     `json:"data"`
@@ -39,22 +39,22 @@ type BlockDSLModel struct {
 }
 
 type BlockPropertyDSLModel struct {
-	Key                string  `json:"key"`
-	ValueMobile        string  `json:"valueMobile"`
-	ValueTablet        string  `json:"valueTablet"`
-	ValueDesktop       string  `json:"valueDesktop"`
-	Type               string  `json:"type"`
-	Description        *string `json:"description"`
-	ValuePicker        string  `json:"valuePicker"`
-	ValuePickerGroup   string  `json:"valuePickerGroup"`
-	ValuePickerOptions string  `json:"valuePickerOptions"`
+	Key                string `json:"key"`
+	ValueMobile        string `json:"valueMobile"`
+	ValueTablet        string `json:"valueTablet"`
+	ValueDesktop       string `json:"valueDesktop"`
+	Type               string `json:"type"`
+	Description        string `json:"description"`
+	ValuePicker        string `json:"valuePicker"`
+	ValuePickerGroup   string `json:"valuePickerGroup"`
+	ValuePickerOptions string `json:"valuePickerOptions"`
 }
 
 type BlockDataDSLModel struct {
-	Key         string  `json:"key"`
-	Value       string  `json:"value"`
-	Type        string  `json:"type"`
-	Description *string `json:"description,omitempty"`
+	Key         string `json:"key"`
+	Value       string `json:"value"`
+	Type        string `json:"type"`
+	Description string `json:"description,omitempty"`
 }
 
 type BlockEventDSLModel struct {
@@ -63,8 +63,8 @@ type BlockEventDSLModel struct {
 }
 
 type BlockSlotDSLModel struct {
-	Slot        string  `json:"slot"`
-	Description *string `json:"description,omitempty"`
+	Slot        string `json:"slot"`
+	Description string `json:"description,omitempty"`
 }
 
 type ActionDSLModel struct {
@@ -84,18 +84,18 @@ type ActionTriggerDSLModel struct {
 }
 
 type TriggerPropertyDSLModel struct {
-	Key                string  `json:"key"`
-	Value              string  `json:"value"`
-	Type               string  `json:"type"`
-	Description        *string `json:"description,omitempty"`
-	ValuePicker        *string `json:"valuePicker,omitempty"`
-	ValuePickerGroup   *string `json:"valuePickerGroup,omitempty"`
-	ValuePickerOptions *string `json:"valuePickerOptions,omitempty"`
+	Key                string `json:"key"`
+	Value              string `json:"value"`
+	Type               string `json:"type"`
+	Description        string `json:"description,omitempty"`
+	ValuePicker        string `json:"valuePicker,omitempty"`
+	ValuePickerGroup   string `json:"valuePickerGroup,omitempty"`
+	ValuePickerOptions string `json:"valuePickerOptions,omitempty"`
 }
 
 type TriggerDataDSLModel struct {
-	Key         string  `json:"key"`
-	Value       string  `json:"value"`
-	Type        string  `json:"type"`
-	Description *string `json:"description,omitempty"`
+	Key         string `json:"key"`
+	Value       string `json:"value"`
+	Type        string `json:"type"`
+	Description string `json:"description,omitempty"`
 }
