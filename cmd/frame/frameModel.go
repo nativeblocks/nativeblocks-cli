@@ -43,9 +43,9 @@ type BlockModel struct {
 	Key                string               `json:"key"`
 	VisibilityKey      string               `json:"visibilityKey"`
 	Position           int                  `json:"position"`
-	Slot               string               `json:"slot,omitempty"`
+	Slot               string               `json:"slot"`
 	IntegrationVersion int                  `json:"integrationVersion"`
-	ParentId           string               `json:"parentId,omitempty"`
+	ParentId           string               `json:"parentId"`
 	Data               []BlockDataModel     `json:"data"`
 	Properties         []BlockPropertyModel `json:"properties"`
 	Slots              []BlockSlotModel     `json:"slots"`
@@ -59,7 +59,7 @@ type BlockPropertyModel struct {
 	ValueTablet        string `json:"valueTablet"`
 	ValueDesktop       string `json:"valueDesktop"`
 	Type               string `json:"type"`
-	Description        string `json:"description,omitempty"`
+	Description        string `json:"description"`
 	ValuePicker        string `json:"valuePicker"`
 	ValuePickerGroup   string `json:"valuePickerGroup"`
 	ValuePickerOptions string `json:"valuePickerOptions"`
@@ -71,14 +71,14 @@ type BlockDataModel struct {
 	Key         string `json:"key"`
 	Value       string `json:"value"`
 	Type        string `json:"type"`
-	Description string `json:"description,omitempty"`
+	Description string `json:"description"`
 }
 
 type BlockSlotModel struct {
 	Id          string `json:"id"`
 	BlockId     string `json:"blockId"`
 	Slot        string `json:"slot"`
-	Description string `json:"description,omitempty"`
+	Description string `json:"description"`
 }
 
 type ActionModel struct {
@@ -92,7 +92,7 @@ type ActionModel struct {
 type ActionTriggerModel struct {
 	Id                 string                 `json:"id"`
 	ActionId           string                 `json:"actionId"`
-	ParentId           string                 `json:"parentId,omitempty"`
+	ParentId           string                 `json:"parentId"`
 	KeyType            string                 `json:"keyType"`
 	Then               string                 `json:"then"`
 	Name               string                 `json:"name"`
@@ -107,10 +107,10 @@ type TriggerPropertyModel struct {
 	Key                string `json:"key"`
 	Value              string `json:"value"`
 	Type               string `json:"type"`
-	Description        string `json:"description,omitempty"`
-	ValuePicker        string `json:"valuePicker,omitempty"`
-	ValuePickerGroup   string `json:"valuePickerGroup,omitempty"`
-	ValuePickerOptions string `json:"valuePickerOptions,omitempty"`
+	Description        string `json:"description"`
+	ValuePicker        string `json:"valuePicker"`
+	ValuePickerGroup   string `json:"valuePickerGroup"`
+	ValuePickerOptions string `json:"valuePickerOptions"`
 }
 
 type TriggerDataModel struct {
@@ -119,5 +119,5 @@ type TriggerDataModel struct {
 	Key             string `json:"key"`
 	Value           string `json:"value"`
 	Type            string `json:"type"`
-	Description     string `json:"description,omitempty"`
+	Description     string `json:"description"`
 }

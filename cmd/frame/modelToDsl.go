@@ -102,6 +102,10 @@ func findBlockChildren(blocks []BlockModel, parentId string, actions []ActionMod
 				}
 			}
 
+			if child.Actions == nil {
+				child.Actions = make([]ActionDSLModel, 0)
+			}
+
 			child.Blocks = findBlockChildren(blocks, block.Id, actions)
 			children = append(children, child)
 		}
@@ -115,14 +119,14 @@ func findBlockChildren(blocks []BlockModel, parentId string, actions []ActionMod
 }
 
 func buildBlockTreeWithActions(blocks []BlockModel, actions []ActionModel) []BlockDSLModel {
-	var roots []BlockDSLModel
+	var dslBlocks []BlockDSLModel
 	for _, block := range blocks {
 		if block.ParentId == "" {
 			root := BlockDSLModel{
 				KeyType:            block.KeyType,
 				Key:                block.Key,
 				VisibilityKey:      block.VisibilityKey,
-				Slot:               block.Slot,
+				Slot:               "null",
 				IntegrationVersion: block.IntegrationVersion,
 				Data:               make([]BlockDataDSLModel, len(block.Data)),
 				Properties:         make([]BlockPropertyDSLModel, len(block.Properties)),
@@ -147,15 +151,19 @@ func buildBlockTreeWithActions(blocks []BlockModel, actions []ActionModel) []Blo
 				}
 			}
 
+			if root.Actions == nil {
+				root.Actions = make([]ActionDSLModel, 0)
+			}
+
 			root.Blocks = findBlockChildren(blocks, block.Id, actions)
-			roots = append(roots, root)
+			dslBlocks = append(dslBlocks, root)
 		}
 	}
 
-	if roots == nil {
+	if dslBlocks == nil {
 		return make([]BlockDSLModel, 0)
 	} else {
-		return roots
+		return dslBlocks
 	}
 }
 
@@ -170,31 +178,25 @@ func mapVariableModelToDSL(variable VariableModel) VariableDSLModel {
 
 func mapBlockDataModelToDSL(data BlockDataModel) BlockDataDSLModel {
 	return BlockDataDSLModel{
-		Key:         data.Key,
-		Value:       data.Value,
-		Type:        data.Type,
-		Description: data.Description,
+		Key:   data.Key,
+		Value: data.Value,
+		Type:  data.Type,
 	}
 }
 
 func mapBlockPropertyModelToDSL(property BlockPropertyModel) BlockPropertyDSLModel {
 	return BlockPropertyDSLModel{
-		Key:                property.Key,
-		ValueMobile:        property.ValueMobile,
-		ValueTablet:        property.ValueTablet,
-		ValueDesktop:       property.ValueDesktop,
-		Type:               property.Type,
-		Description:        property.Description,
-		ValuePicker:        property.ValuePicker,
-		ValuePickerGroup:   property.ValuePickerGroup,
-		ValuePickerOptions: property.ValuePickerOptions,
+		Key:          property.Key,
+		ValueMobile:  property.ValueMobile,
+		ValueTablet:  property.ValueTablet,
+		ValueDesktop: property.ValueDesktop,
+		Type:         property.Type,
 	}
 }
 
 func mapBlockSlotModelToDSL(slot BlockSlotModel) BlockSlotDSLModel {
 	return BlockSlotDSLModel{
-		Slot:        slot.Slot,
-		Description: slot.Description,
+		Slot: slot.Slot,
 	}
 }
 
@@ -208,33 +210,28 @@ func mapActionModelToDSL(action ActionModel) ActionDSLModel {
 
 func mapTriggerPropertyModelToDSL(property TriggerPropertyModel) TriggerPropertyDSLModel {
 	return TriggerPropertyDSLModel{
-		Key:                property.Key,
-		Value:              property.Value,
-		Type:               property.Type,
-		Description:        property.Description,
-		ValuePicker:        property.ValuePicker,
-		ValuePickerGroup:   property.ValuePickerGroup,
-		ValuePickerOptions: property.ValuePickerOptions,
+		Key:   property.Key,
+		Value: property.Value,
+		Type:  property.Type,
 	}
 }
 
 func mapTriggerDataModelToDSL(data TriggerDataModel) TriggerDataDSLModel {
 	return TriggerDataDSLModel{
-		Key:         data.Key,
-		Value:       data.Value,
-		Type:        data.Type,
-		Description: data.Description,
+		Key:   data.Key,
+		Value: data.Value,
+		Type:  data.Type,
 	}
 }
 
-func mapFrameModelToDSL(frame FrameModel) FrameDSLModel {
+func mapFrameModelToDSL(frame FrameModel, schema string) FrameDSLModel {
 	variables := make([]VariableDSLModel, len(frame.Variables))
 	for i, variable := range frame.Variables {
 		variables[i] = mapVariableModelToDSL(variable)
 	}
 
 	return FrameDSLModel{
-		Schema:    "https://your-schema-url.com",
+		Schema:    schema,
 		Name:      frame.Name,
 		Route:     frame.Route,
 		Type:      frame.Type,

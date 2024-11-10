@@ -47,11 +47,6 @@ func processTriggers(actionId string, triggers []ActionTriggerDSLModel, parentId
 			Data:               []TriggerDataModel{},
 		}
 
-		if newTrigger.ParentId == "" {
-			emptyParentId := ""
-			newTrigger.ParentId = emptyParentId
-		}
-
 		for _, property := range trigger.Properties {
 			newProperty := TriggerPropertyModel{
 				Id:                 generateId(),
@@ -59,15 +54,10 @@ func processTriggers(actionId string, triggers []ActionTriggerDSLModel, parentId
 				Key:                property.Key,
 				Type:               property.Type,
 				Value:              property.Value,
-				Description:        property.Description,
-				ValuePicker:        property.ValuePicker,
-				ValuePickerGroup:   property.ValuePickerGroup,
-				ValuePickerOptions: property.ValuePickerOptions,
-			}
-
-			if newProperty.Description == "" {
-				emptyDescription := ""
-				newProperty.Description = emptyDescription
+				Description:        "",
+				ValuePicker:        "",
+				ValuePickerGroup:   "",
+				ValuePickerOptions: "",
 			}
 
 			newTrigger.Properties = append(newTrigger.Properties, newProperty)
@@ -80,12 +70,7 @@ func processTriggers(actionId string, triggers []ActionTriggerDSLModel, parentId
 				Key:             dataItem.Key,
 				Value:           dataItem.Value,
 				Type:            dataItem.Type,
-				Description:     dataItem.Description,
-			}
-
-			if newData.Description == "" {
-				emptyDescription := ""
-				newData.Description = emptyDescription
+				Description:     "",
 			}
 
 			newTrigger.Data = append(newTrigger.Data, newData)
@@ -133,14 +118,16 @@ func processBlocks(frameId string, blocks []BlockDSLModel, parentId string, pare
 			Slots:              []BlockSlotModel{},
 		}
 
-		if newBlock.Slot == "" {
-			contentSlot := "content"
-			newBlock.Slot = contentSlot
+		if newBlock.Slot == "null" {
+			emptySlot := ""
+			newBlock.Slot = emptySlot
 		}
 
-		if newBlock.ParentId == "" {
-			emptyParentId := ""
-			newBlock.ParentId = emptyParentId
+		if len(parentSlots) > 0 {
+			contain := containsSlot(parentSlots, newBlock.Slot)
+			if !contain {
+				return nil, errors.New("The " + newBlock.Key + " used in a wrong slot")
+			}
 		}
 
 		onNewAction(processActions(frameId, block.Key, block.Actions, variables))
@@ -154,15 +141,10 @@ func processBlocks(frameId string, blocks []BlockDSLModel, parentId string, pare
 				ValueMobile:        property.ValueMobile,
 				ValueTablet:        property.ValueTablet,
 				ValueDesktop:       property.ValueDesktop,
-				Description:        property.Description,
-				ValuePicker:        property.ValuePicker,
-				ValuePickerGroup:   property.ValuePickerGroup,
-				ValuePickerOptions: property.ValuePickerOptions,
-			}
-
-			if newProperty.Description == "" {
-				emptyDescription := ""
-				newProperty.Description = emptyDescription
+				Description:        "",
+				ValuePicker:        "",
+				ValuePickerGroup:   "",
+				ValuePickerOptions: "",
 			}
 
 			newBlock.Properties = append(newBlock.Properties, newProperty)
@@ -175,12 +157,7 @@ func processBlocks(frameId string, blocks []BlockDSLModel, parentId string, pare
 				Key:         dataItem.Key,
 				Value:       dataItem.Value,
 				Type:        dataItem.Type,
-				Description: dataItem.Description,
-			}
-
-			if newData.Description == "" {
-				emptyDescription := ""
-				newData.Description = emptyDescription
+				Description: "",
 			}
 
 			newBlock.Data = append(newBlock.Data, newData)
@@ -191,12 +168,7 @@ func processBlocks(frameId string, blocks []BlockDSLModel, parentId string, pare
 				Id:          generateId(),
 				BlockId:     newBlock.Id,
 				Slot:        slotItem.Slot,
-				Description: slotItem.Description,
-			}
-
-			if newSlot.Description == "" {
-				emptyDescription := ""
-				newSlot.Description = emptyDescription
+				Description: "",
 			}
 
 			newBlock.Slots = append(newBlock.Slots, newSlot)
@@ -339,4 +311,13 @@ func findTriggerVariable(variables []VariableModel, data []TriggerDataModel) err
 		}
 	}
 	return nil
+}
+
+func containsSlot(slots []BlockSlotModel, key string) bool {
+	for _, slot := range slots {
+		if slot.Slot == key {
+			return true
+		}
+	}
+	return false
 }

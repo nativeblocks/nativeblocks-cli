@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/nativeblocks/cli/cmd/auth"
+	"github.com/nativeblocks/cli/cmd/project"
+	"github.com/nativeblocks/cli/cmd/region"
 	"github.com/nativeblocks/cli/library/fileutil"
 	"github.com/spf13/cobra"
 )
@@ -15,8 +18,8 @@ func FrameCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(genCommand())
-	// cmd.AddCommand(pushCommand())
-	// cmd.AddCommand(pullCommand())
+	cmd.AddCommand(pushCommand())
+	cmd.AddCommand(pullCommand())
 	return cmd
 }
 
@@ -71,195 +74,135 @@ func genCommand() *cobra.Command {
 	return cmd
 }
 
-// func pushCommand() *cobra.Command {
-// 	var directory string
-// 	cmd := &cobra.Command{
-// 		Use:   "push",
-// 		Short: "Push a frame",
-// 		RunE: func(cmd *cobra.Command, args []string) error {
-// 			baseFm, err := fileutil.NewFileManager(nil)
-// 			if err != nil {
-// 				return err
-// 			}
+func pushCommand() *cobra.Command {
+	var directory string
+	cmd := &cobra.Command{
+		Use:   "push",
+		Short: "Push a frame",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			baseFm, err := fileutil.NewFileManager(nil)
+			if err != nil {
+				return err
+			}
 
-// 			var regionConfig RegionConfig
-// 			if err := baseFm.LoadFromFile(RegionFileName, &regionConfig); err != nil {
-// 				return fmt.Errorf("region not set. Please set region first using 'nativeblocks region set <url>'")
-// 			}
+			region, err := region.GetRegion(*baseFm)
+			if err != nil {
+				return err
+			}
 
-// 			var authConfig AuthConfig
-// 			if err := baseFm.LoadFromFile(AuthFileName, &authConfig); err != nil {
-// 				return fmt.Errorf("not authenticated. Please login first using 'nativeblocks auth'")
-// 			}
+			auth, err := auth.AuthGet(*baseFm)
+			if err != nil {
+				return err
+			}
 
-// 			var projectConfig ProjectConfig
-// 			if err := baseFm.LoadFromFile(ProjectFileName, &projectConfig); err != nil {
-// 				return fmt.Errorf("project not set. Please select a project first using 'nativeblocks project set'")
-// 			}
+			project, err := project.GetProject(*baseFm)
+			if err != nil {
+				return err
+			}
 
-// 			baseDir := fileutil.GetFileDir(directory)
-// 			fileName := fileutil.GetFileName(directory)
+			baseDir := fileutil.GetFileDir(directory)
+			fileName := fileutil.GetFileName(directory)
 
-// 			fm, err := fileutil.NewFileManager(&baseDir)
-// 			if err != nil {
-// 				return err
-// 			}
+			inputFm, err := fileutil.NewFileManager(&baseDir)
+			if err != nil {
+				return err
+			}
 
-// 			fileExists := fm.FileExists(fileName)
-// 			if !fileExists {
-// 				return fmt.Errorf("could not find the file under: %v", directory)
-// 			}
+			fileExists := inputFm.FileExists(fileName)
+			if !fileExists {
+				return fmt.Errorf("could not find the file under: %v", directory)
+			}
 
-// 			var jsonDSL FrameDSLModel
-// 			fileError := fm.LoadFromFile(fileName, &jsonDSL)
-// 			if fileError != nil {
+			var jsonDSL FrameDSLModel
+			err = inputFm.LoadFromFile(fileName, &jsonDSL)
+			if err != nil {
+				return err
+			}
 
-// 			}
-// 			output, err := generateFrame(jsonDSL)
-// 			if err != nil {
-// 				return err
-// 			}
+			output, err := generateFrame(jsonDSL)
+			if err != nil {
+				return err
+			}
 
-// 			if output.ID == "" {
-// 				return nil
-// 			}
+			err = pushFrame(output, region.Url, auth.AccessToken, project.APIKeys[0].APIKey)
+			if err != nil {
+				return err
+			}
 
-// 			client := graphqlutil.NewClient()
+			fmt.Printf("Frame successfully synced \n")
 
-// 			jsonBytes, _ := json.Marshal(output)
-// 			input := map[string]interface{}{
-// 				"route":     jsonDSL.Route,
-// 				"frameJson": string(jsonBytes),
-// 			}
+			return nil
+		},
+	}
 
-// 			variables := map[string]interface{}{
-// 				"input": input,
-// 			}
+	cmd.Flags().StringVarP(&directory, "directory", "d", "", "Frame working directory")
+	cmd.MarkFlagRequired("directory")
 
-// 			headers := map[string]string{
-// 				"Authorization": "Bearer " + authConfig.AccessToken,
-// 				"Api-Key":       "Bearer " + projectConfig.APIKey,
-// 			}
+	return cmd
+}
 
-// 			resp, err := client.Execute(
-// 				regionConfig.URL,
-// 				headers,
-// 				syncFrameMutation,
-// 				variables,
-// 			)
-// 			if err != nil {
-// 				return fmt.Errorf("sync failed: %v", err)
-// 			}
+func pullCommand() *cobra.Command {
+	var directory string
+	cmd := &cobra.Command{
+		Use:   "pull",
+		Short: "Pull a frame",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			baseFm, err := fileutil.NewFileManager(nil)
+			if err != nil {
+				return err
+			}
 
-// 			json.Marshal(resp.Data)
-// 			fmt.Printf("Frame successfully synced \n")
+			region, err := region.GetRegion(*baseFm)
+			if err != nil {
+				return err
+			}
 
-// 			return nil
-// 		},
-// 	}
+			auth, err := auth.AuthGet(*baseFm)
+			if err != nil {
+				return err
+			}
 
-// 	cmd.Flags().StringVarP(&directory, "directory", "d", "", "Frame working directory")
-// 	cmd.MarkFlagRequired("directory")
+			project, err := project.GetProject(*baseFm)
+			if err != nil {
+				return err
+			}
 
-// 	return cmd
-// }
+			baseDir := fileutil.GetFileDir(directory)
+			fileName := fileutil.GetFileName(directory)
 
-// func pullCommand() *cobra.Command {
-// 	var directory string
-// 	cmd := &cobra.Command{
-// 		Use:   "pull",
-// 		Short: "Pull a frame",
-// 		RunE: func(cmd *cobra.Command, args []string) error {
-// 			baseFm, err := fileutil.NewFileManager(nil)
-// 			if err != nil {
-// 				return err
-// 			}
+			inputFm, err := fileutil.NewFileManager(&baseDir)
+			if err != nil {
+				return err
+			}
 
-// 			var regionConfig RegionConfig
-// 			if err := baseFm.LoadFromFile(RegionFileName, &regionConfig); err != nil {
-// 				return fmt.Errorf("region not set. Please set region first using 'nativeblocks region set <url>'")
-// 			}
+			fileExists := inputFm.FileExists(fileName)
+			if !fileExists {
+				return fmt.Errorf("could not find the file under: %v", directory)
+			}
 
-// 			var authConfig AuthConfig
-// 			if err := baseFm.LoadFromFile(AuthFileName, &authConfig); err != nil {
-// 				return fmt.Errorf("not authenticated. Please login first using 'nativeblocks auth'")
-// 			}
+			var jsonDSL FrameDSLModel
+			err = inputFm.LoadFromFile(fileName, &jsonDSL)
+			if err != nil {
+				return err
+			}
 
-// 			var projectConfig ProjectConfig
-// 			if err := baseFm.LoadFromFile(ProjectFileName, &projectConfig); err != nil {
-// 				return fmt.Errorf("project not set. Please select a project first using 'nativeblocks project set'")
-// 			}
+			if jsonDSL.Route == "" {
+				return fmt.Errorf("could not find frame route")
+			}
 
-// 			baseDir := fileutil.GetFileDir(directory)
-// 			fileName := fileutil.GetFileName(directory)
+			err = pullFrame(*inputFm, region.Url, auth.AccessToken, project.APIKeys[0].APIKey, fileName, jsonDSL.Schema, jsonDSL.Route)
+			if err != nil {
+				return err
+			}
 
-// 			fm, err := fileutil.NewFileManager(&baseDir)
-// 			if err != nil {
-// 				return err
-// 			}
+			fmt.Printf("Frame successfully synced \n")
 
-// 			fileExists := fm.FileExists(fileName)
-// 			if !fileExists {
-// 				return fmt.Errorf("could not find the file under: %v", directory)
-// 			}
+			return nil
+		},
+	}
 
-// 			var jsonDSL FrameDSLModel
-// 			fileError := fm.LoadFromFile(fileName, &jsonDSL)
-// 			if fileError != nil {
+	cmd.Flags().StringVarP(&directory, "directory", "d", "", "Frame working directory")
+	cmd.MarkFlagRequired("directory")
 
-// 			}
-
-// 			if jsonDSL.Route == "" {
-// 				return fmt.Errorf("could not find frame route")
-// 			}
-
-// 			client := graphqlutil.NewClient()
-
-// 			variables := map[string]interface{}{
-// 				"route": jsonDSL.Route,
-// 			}
-
-// 			headers := map[string]string{
-// 				"Authorization": "Bearer " + authConfig.AccessToken,
-// 				"Api-Key":       "Bearer " + projectConfig.APIKey,
-// 			}
-
-// 			resp, err := client.Execute(
-// 				regionConfig.URL,
-// 				headers,
-// 				getFrameQuery,
-// 				variables,
-// 			)
-// 			if err != nil {
-// 				return fmt.Errorf("failed to process response: %v", err)
-// 			}
-// 			responseData, err := json.Marshal(resp.Data)
-// 			if err != nil {
-// 				return fmt.Errorf("failed to process response: %v", err)
-// 			}
-
-// 			var frameResponse FrameWrapper
-// 			if err := json.Unmarshal(responseData, &frameResponse); err != nil {
-// 				fmt.Printf("Debug - Raw response: %s\n", string(responseData))
-// 				return fmt.Errorf("failed to parse organizations response: %v", err)
-// 			}
-
-// 			frame := mapFrameModelToDSL(frameResponse.Frame)
-// 			if frame.Route == "" {
-// 				return fmt.Errorf("could not find frame route %v", frame.Route)
-// 			}
-// 			if err := fm.SaveToFile(fileName, frame); err != nil {
-// 				return err
-// 			}
-
-// 			fmt.Printf("Frame successfully synced \n")
-
-// 			return nil
-// 		},
-// 	}
-
-// 	cmd.Flags().StringVarP(&directory, "directory", "d", "", "Frame working directory")
-// 	cmd.MarkFlagRequired("directory")
-
-// 	return cmd
-// }
+	return cmd
+}
