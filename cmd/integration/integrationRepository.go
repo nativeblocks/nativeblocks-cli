@@ -2,6 +2,7 @@ package integration
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/nativeblocks/cli/library/fileutil"
 	"github.com/nativeblocks/cli/library/graphqlutil"
@@ -66,6 +67,21 @@ const integrationsQuery = `
   }
 `
 
+const syncIntegrationMutation = `
+	mutation syncIntegration($input: SyncIntegrationInput!) {
+		syncIntegration(input: $input) {
+			id
+			keyType
+			name
+			imageIcon
+			price
+			description
+			kind
+			documentation
+		}
+	}
+`
+
 func GetIntegrations(fm fileutil.FileManager, regionUrl string, accessToken string, organizationId string, kind string, platformSupport string) ([]IntegrationModel, error) {
 	client := graphqlutil.NewClient()
 
@@ -100,6 +116,46 @@ func GetIntegrations(fm fileutil.FileManager, regionUrl string, accessToken stri
 		return nil, errors.New("no projects found")
 	}
 	return mapIntegrationsResponseToModel(integrationResponse), nil
+}
+
+func SyncIntegration(fm fileutil.FileManager, regionUrl string, accessToken string, organizationId string, jsonInput IntegrationModel) error {
+	client := graphqlutil.NewClient()
+
+	input := map[string]interface{}{
+		"organizationId":   organizationId,
+		"name":             jsonInput.Name,
+		"description":      jsonInput.Description,
+		"documentation":    "",
+		"imageIcon":        "",
+		"keyType":          jsonInput.KeyType,
+		"kind":             jsonInput.Kind,
+		"platformSupport":  jsonInput.PlatformSupport,
+		"price":            0,
+		"version":          jsonInput.Version,
+		"deprecated":       jsonInput.Deprecated,
+		"deprecatedReason": jsonInput.DeprecatedReason,
+		"public":           false,
+	}
+
+	variables := map[string]interface{}{
+		"input": input,
+	}
+
+	headers := map[string]string{
+		"Authorization": "Bearer " + accessToken,
+	}
+
+	_, err := client.Execute(
+		regionUrl,
+		headers,
+		syncIntegrationMutation,
+		variables,
+	)
+	if err != nil {
+		return fmt.Errorf("sync failed: %v", err)
+	}
+
+	return nil
 }
 
 func mapIntegrationsResponseToModel(response IntegrationsResponse) []IntegrationModel {

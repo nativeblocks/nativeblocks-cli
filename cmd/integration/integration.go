@@ -25,6 +25,7 @@ func IntegrationCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(integrationListCmd())
+	cmd.AddCommand(integrationSyncCmd())
 
 	return cmd
 }
@@ -82,5 +83,70 @@ func integrationListCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&platform, "platform", "p", "", "Integration platform")
 	cmd.MarkFlagRequired("kind")
 	cmd.MarkFlagRequired("platform")
+	return cmd
+}
+
+func integrationSyncCmd() *cobra.Command {
+	var directory string
+	cmd := &cobra.Command{
+		Use:   "sync",
+		Short: "Get integration sync",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fm, err := fileutil.NewFileManager(nil)
+			if err != nil {
+				return err
+			}
+
+			region, err := region.GetRegion(*fm)
+			if err != nil {
+				return err
+			}
+
+			auth, err := auth.AuthGet(*fm)
+			if err != nil {
+				return err
+			}
+
+			organization, err := organization.GetOrganization(*fm)
+			if err != nil {
+				return err
+			}
+
+			baseDir := fileutil.GetFileDir(directory)
+			fileName := fileutil.GetFileName(directory)
+
+			inputFm, err := fileutil.NewFileManager(&baseDir)
+			if err != nil {
+				return err
+			}
+
+			fileExists := inputFm.FileExists(fileName)
+			if !fileExists {
+				return fmt.Errorf("could not find the file under: %v", directory)
+			}
+
+			var jsonInput IntegrationModel
+			err = inputFm.LoadFromFile(fileName, &jsonInput)
+			if err != nil {
+				return err
+			}
+
+			if jsonInput.KeyType == "" {
+				return fmt.Errorf("could not find integration keyType")
+			}
+
+			err = SyncIntegration(*fm, region.Url, auth.AccessToken, organization.Id, jsonInput)
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("Integration successfully synced \n")
+
+			return nil
+		},
+	}
+	cmd.Flags().StringVarP(&directory, "directory", "d", "", "Integration working directory")
+	cmd.MarkFlagRequired("keyType")
+	cmd.MarkFlagRequired("directory")
 	return cmd
 }
