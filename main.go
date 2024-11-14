@@ -15,7 +15,7 @@ import (
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "nativeblocks",
-		Short: "NativeBlocks CLI",
+		Short: "Nativeblocks cli",
 	}
 
 	rootCmd.AddCommand(
