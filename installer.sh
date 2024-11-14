@@ -7,15 +7,21 @@ if ! command -v curl > /dev/null; then
     exit 1
 fi
 
+# Check for zip installation
+if ! command -v unzip > /dev/null; then
+    echo "unzip not found."
+    exit 1
+fi
+
 # Check OS and architecture
 OS=$(uname)
 ARCH=$(uname -m)
 case "$OS" in
     Darwin)
         if [[ "$ARCH" == "arm64" ]]; then
-            FILE="nativeblocks-cli_Darwin_arm64.tar.gz"
+            FILE="nativeblocks_Darwin_arm64.tar.gz"
         elif [[ "$ARCH" == "x86_64" ]]; then
-            FILE="nativeblocks-cli_Darwin_x86_64.tar.gz"
+            FILE="nativeblocks_Darwin_x86_64.tar.gz"
         else
             echo "Unsupported architecture for Darwin: $ARCH"
             exit 1
@@ -23,11 +29,11 @@ case "$OS" in
         ;;
     Linux)
         if [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
-            FILE="nativeblocks-cli_Linux_arm64.tar.gz"
+            FILE="nativeblocks_Linux_arm64.tar.gz"
         elif [[ "$ARCH" == "x86_64" ]]; then
-            FILE="nativeblocks-cli_Linux_x86_64.tar.gz"
+            FILE="nativeblocks_Linux_x86_64.tar.gz"
         elif [[ "$ARCH" == "i386" || "$ARCH" == "i686" ]]; then
-            FILE="nativeblocks-cli_Linux_i386.tar.gz"
+            FILE="nativeblocks_Linux_i386.tar.gz"
         else
             echo "Unsupported architecture for Linux: $ARCH"
             exit 1
@@ -35,11 +41,11 @@ case "$OS" in
         ;;
     MINGW*|MSYS*|CYGWIN*|Windows_NT)
         if [[ "$ARCH" == "arm64" ]]; then
-            FILE="nativeblocks-cli_Windows_arm64.zip"
+            FILE="nativeblocks_Windows_arm64.zip"
         elif [[ "$ARCH" == "x86_64" ]]; then
-            FILE="nativeblocks-cli_Windows_x86_64.zip"
+            FILE="nativeblocks_Windows_x86_64.zip"
         elif [[ "$ARCH" == "i386" || "$ARCH" == "i686" ]]; then
-            FILE="nativeblocks-cli_Windows_i386.zip"
+            FILE="nativeblocks_Windows_i386.zip"
         else
             echo "Unsupported architecture for Windows: $ARCH"
             exit 1
@@ -78,6 +84,10 @@ else
     exit 1
 fi
 
+# Rename the binary file
+echo "Renaming binary..."
+mv "$NATIVEBLOCKS_BIN_DIR/nativeblocks-cli" "$NATIVEBLOCKS_BIN_DIR/nativeblocks"
+
 # Clean up
 rm -rf "$NATIVEBLOCKS_TMP"
 
@@ -96,7 +106,7 @@ if ! grep -q 'nativeblocks/bin' <<< "$PATH"; then
             ;;
     esac
     echo "export PATH=\"\$PATH:$NATIVEBLOCKS_BIN_DIR\"" >> "$SHELL_CONFIG"
-    echo "* Added nativeblocks-cli to PATH in $SHELL_CONFIG"
+    echo "* Added nativeblocks to PATH in $SHELL_CONFIG"
 fi
 
 echo ""
