@@ -108,12 +108,12 @@ func projectGetCmd() *cobra.Command {
 
 func projectSchemaGenCmd() *cobra.Command {
 	var edition string
-	var directory string
+	var path string
 	cmd := &cobra.Command{
 		Use:   "gen-schema",
 		Short: "Generate a JSON schema file",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			finalDir := directory + "/.nativeblocks"
+			finalDir := path + "/.nativeblocks"
 			inputFm, err := fileutil.NewFileManager(&finalDir)
 			if err != nil {
 				return err
@@ -213,8 +213,8 @@ func projectSchemaGenCmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVarP(&edition, "edition", "e", "", "Edition type (cloud or community)")
-	cmd.Flags().StringVarP(&directory, "directory", "d", "", "Output directory path")
+	cmd.Flags().StringVarP(&path, "path", "p", "", "Output path path")
 	cmd.MarkFlagRequired("edition")
-	cmd.MarkFlagRequired("directory")
+	cmd.MarkFlagRequired("path")
 	return cmd
 }

@@ -19,7 +19,7 @@ type FileManager struct {
 func NewFileManager(customDir *string) (*FileManager, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get home directory: %v", err)
+		return nil, fmt.Errorf("failed to get home path: %v", err)
 	}
 
 	var baseDir string
@@ -30,7 +30,7 @@ func NewFileManager(customDir *string) (*FileManager, error) {
 	}
 
 	if err := os.MkdirAll(baseDir, 0755); err != nil {
-		return nil, fmt.Errorf("failed to create config directory: %v", err)
+		return nil, fmt.Errorf("failed to create config path: %v", err)
 	}
 
 	return &FileManager{BaseDir: baseDir}, nil

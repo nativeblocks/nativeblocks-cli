@@ -24,13 +24,13 @@ func FrameCmd() *cobra.Command {
 }
 
 func genCommand() *cobra.Command {
-	var directory string
+	var path string
 	cmd := &cobra.Command{
 		Use:   "gen",
 		Short: "Generate a frame",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			baseDir := fileutil.GetFileDir(directory)
-			fileName := fileutil.GetFileName(directory)
+			baseDir := fileutil.GetFileDir(path)
+			fileName := fileutil.GetFileName(path)
 
 			fm, err := fileutil.NewFileManager(&baseDir)
 			if err != nil {
@@ -39,7 +39,7 @@ func genCommand() *cobra.Command {
 
 			fileExists := fm.FileExists(fileName)
 			if !fileExists {
-				return fmt.Errorf("could not find the file under: %v", directory)
+				return fmt.Errorf("could not find the file under: %v", path)
 			}
 
 			var jsonDSL FrameDSLModel
@@ -68,14 +68,14 @@ func genCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&directory, "directory", "d", "", "Frame working directory")
-	cmd.MarkFlagRequired("directory")
+	cmd.Flags().StringVarP(&path, "path", "p", "", "Frame working path")
+	cmd.MarkFlagRequired("path")
 
 	return cmd
 }
 
 func pushCommand() *cobra.Command {
-	var directory string
+	var path string
 	cmd := &cobra.Command{
 		Use:   "push",
 		Short: "Push a frame",
@@ -100,8 +100,8 @@ func pushCommand() *cobra.Command {
 				return err
 			}
 
-			baseDir := fileutil.GetFileDir(directory)
-			fileName := fileutil.GetFileName(directory)
+			baseDir := fileutil.GetFileDir(path)
+			fileName := fileutil.GetFileName(path)
 
 			inputFm, err := fileutil.NewFileManager(&baseDir)
 			if err != nil {
@@ -110,7 +110,7 @@ func pushCommand() *cobra.Command {
 
 			fileExists := inputFm.FileExists(fileName)
 			if !fileExists {
-				return fmt.Errorf("could not find the file under: %v", directory)
+				return fmt.Errorf("could not find the file under: %v", path)
 			}
 
 			var jsonDSL FrameDSLModel
@@ -135,14 +135,14 @@ func pushCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&directory, "directory", "d", "", "Frame working directory")
-	cmd.MarkFlagRequired("directory")
+	cmd.Flags().StringVarP(&path, "path", "p", "", "Frame working path")
+	cmd.MarkFlagRequired("path")
 
 	return cmd
 }
 
 func pullCommand() *cobra.Command {
-	var directory string
+	var path string
 	cmd := &cobra.Command{
 		Use:   "pull",
 		Short: "Pull a frame",
@@ -167,8 +167,8 @@ func pullCommand() *cobra.Command {
 				return err
 			}
 
-			baseDir := fileutil.GetFileDir(directory)
-			fileName := fileutil.GetFileName(directory)
+			baseDir := fileutil.GetFileDir(path)
+			fileName := fileutil.GetFileName(path)
 
 			inputFm, err := fileutil.NewFileManager(&baseDir)
 			if err != nil {
@@ -177,7 +177,7 @@ func pullCommand() *cobra.Command {
 
 			fileExists := inputFm.FileExists(fileName)
 			if !fileExists {
-				return fmt.Errorf("could not find the file under: %v", directory)
+				return fmt.Errorf("could not find the file under: %v", path)
 			}
 
 			var jsonDSL FrameDSLModel
@@ -201,8 +201,8 @@ func pullCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&directory, "directory", "d", "", "Frame working directory")
-	cmd.MarkFlagRequired("directory")
+	cmd.Flags().StringVarP(&path, "path", "p", "", "Frame working path")
+	cmd.MarkFlagRequired("path")
 
 	return cmd
 }

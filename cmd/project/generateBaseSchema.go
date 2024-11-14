@@ -316,7 +316,7 @@ func findKeyTypes(dirPath string) []string {
 
 	err := filepath.Walk(dirPath, walkFunc)
 	if err != nil {
-		fmt.Printf("Error walking directory: %v\n", err)
+		fmt.Printf("Error walking path: %v\n", err)
 		return nil
 	}
 
@@ -357,7 +357,7 @@ func findData(dirPath string) []string {
 
 	err := filepath.Walk(dirPath, walkFunc)
 	if err != nil {
-		fmt.Printf("Error walking directory: %v\n", err)
+		fmt.Printf("Error walking path: %v\n", err)
 		return nil
 	}
 
@@ -399,7 +399,7 @@ func findProperties(dirPath string) []string {
 
 	err := filepath.Walk(dirPath, walkFunc)
 	if err != nil {
-		fmt.Printf("Error walking directory: %v\n", err)
+		fmt.Printf("Error walking path: %v\n", err)
 		return nil
 	}
 
