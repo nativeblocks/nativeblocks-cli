@@ -112,30 +112,7 @@ func integrationSyncCmd() *cobra.Command {
 				return err
 			}
 
-			baseDir := fileutil.GetFileDir(directory)
-			fileName := fileutil.GetFileName(directory)
-
-			inputFm, err := fileutil.NewFileManager(&baseDir)
-			if err != nil {
-				return err
-			}
-
-			fileExists := inputFm.FileExists(fileName)
-			if !fileExists {
-				return fmt.Errorf("could not find the file under: %v", directory)
-			}
-
-			var jsonInput IntegrationModel
-			err = inputFm.LoadFromFile(fileName, &jsonInput)
-			if err != nil {
-				return err
-			}
-
-			if jsonInput.KeyType == "" {
-				return fmt.Errorf("could not find integration keyType")
-			}
-
-			err = SyncIntegration(*fm, region.Url, auth.AccessToken, organization.Id, jsonInput)
+			err = SyncIntegration(region.Url, auth.AccessToken, organization.Id, directory)
 			if err != nil {
 				return err
 			}

@@ -24,6 +24,10 @@ type IntegrationsResponse struct {
 	Integrations []IntegrationModel `json:"integrations"`
 }
 
+type SyncIntegrationsResponse struct {
+	Integration IntegrationModel `json:"syncIntegration"`
+}
+
 type IntegrationDataModel struct {
 	Key              string `json:"key"`
 	Type             string `json:"type"`
