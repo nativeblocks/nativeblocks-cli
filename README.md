@@ -1,5 +1,11 @@
 # Nativeblocks CLI
 
+### Installation
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/nativeblocks/nativeblocks-cli/main/installer.sh | bash
+```
+
 You can always find all command by help command
 
 ```bash
