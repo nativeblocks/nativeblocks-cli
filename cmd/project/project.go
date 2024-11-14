@@ -213,7 +213,7 @@ func projectSchemaGenCmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVarP(&edition, "edition", "e", "", "Edition type (cloud or community)")
-	cmd.Flags().StringVarP(&path, "path", "p", "", "Output path path")
+	cmd.Flags().StringVarP(&path, "path", "p", "", "Output path")
 	cmd.MarkFlagRequired("edition")
 	cmd.MarkFlagRequired("path")
 	return cmd

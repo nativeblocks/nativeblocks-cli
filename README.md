@@ -34,16 +34,39 @@ nativeblocks auth -u "foo@example.com" -p "foobar1234"
 
 ### Organization
 
-#### Set organization id
+#### Set organization
 
 ```bash
 nativeblocks organization set
 ```
 
-#### Get organization id
+#### Get organization
 
 ```bash
-nativeblocks region get
+nativeblocks organization get
+```
+
+### Project
+
+#### Set project
+
+```bash
+nativeblocks project set
+```
+
+#### Get project
+
+```bash
+nativeblocks project get
+```
+
+#### Generate project schema
+
+- -p, --path, Project working path
+- -e, --edition, Edition type (cloud or community)
+
+```bash
+nativeblocks project gen-schema
 ```
 
 ### Integration
