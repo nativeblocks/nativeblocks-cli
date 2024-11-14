@@ -20,11 +20,14 @@ type IntegrationModel struct {
 	Slots            []IntegrationSlotModel     `json:"slots,omitempty"`
 }
 
+type IntegrationResponse struct {
+	Integration IntegrationModel `json:"integration"`
+}
 type IntegrationsResponse struct {
 	Integrations []IntegrationModel `json:"integrations"`
 }
 
-type SyncIntegrationsResponse struct {
+type SyncIntegrationResponse struct {
 	Integration IntegrationModel `json:"syncIntegration"`
 }
 

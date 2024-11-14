@@ -68,6 +68,58 @@ const integrationsQuery = `
   }
 `
 
+const integrationQuery = `
+query integration($organizationId: String!, $integrationId: String!) {
+  integration(organizationId: $organizationId, integrationId: $integrationId) {
+    id
+    name
+    keyType
+    imageIcon
+    version
+    deprecated
+    deprecatedReason
+    description
+    documentation
+    platformSupport
+    kind
+    public
+    properties {
+      id
+      key
+      value
+      type
+      description
+      valuePicker
+      valuePickerGroup
+      valuePickerOptions
+      deprecated
+      deprecatedReason
+    }
+    events {
+      id
+      event
+      description
+      deprecated
+      deprecatedReason
+    }
+    data {
+      id
+      key
+      type
+      description
+      deprecated
+      deprecatedReason
+    }
+    slots {
+      id
+      slot
+      description
+      deprecated
+      deprecatedReason
+    }
+  }
+}`
+
 const syncIntegrationMutation = `
 	mutation syncIntegration($input: SyncIntegrationInput!) {
 		syncIntegration(input: $input) {
@@ -150,26 +202,26 @@ func GetIntegrations(fm fileutil.FileManager, regionUrl string, accessToken stri
 		return nil, err
 	}
 	if len(integrationResponse.Integrations) == 0 {
-		return nil, errors.New("no projects found")
+		return nil, errors.New("no integrations found")
 	}
 	return mapIntegrationsResponseToModel(integrationResponse), nil
 }
 
-func SyncIntegration(regionUrl string, accessToken string, organizationId string, directory string) error {
+func SyncIntegration(regionUrl string, accessToken string, organizationId string, path string) error {
 	integrationFileName := "integration.json"
 	propertiesFileName := "properties.json"
 	dataFileName := "data.json"
 	eventsFileName := "events.json"
 	slotsFileName := "slots.json"
 
-	inputFm, err := fileutil.NewFileManager(&directory)
+	inputFm, err := fileutil.NewFileManager(&path)
 	if err != nil {
 		return err
 	}
 
 	fileExists := inputFm.FileExists(integrationFileName)
 	if !fileExists {
-		return fmt.Errorf("could not find the file under: %v", directory)
+		return fmt.Errorf("could not find the file under: %v", path)
 	}
 
 	var jsonInput IntegrationModel
@@ -208,7 +260,6 @@ func SyncIntegration(regionUrl string, accessToken string, organizationId string
 		"Authorization": "Bearer " + accessToken,
 	}
 
-	// Get initial integration sync response
 	apiResponse, err := client.Execute(
 		regionUrl,
 		headers,
@@ -219,8 +270,8 @@ func SyncIntegration(regionUrl string, accessToken string, organizationId string
 		return fmt.Errorf("sync failed: %v", err)
 	}
 
-	var syncIntegrationsResponse SyncIntegrationsResponse
-	err = graphqlutil.Parse(apiResponse, &syncIntegrationsResponse)
+	var syncIntegrationResponse SyncIntegrationResponse
+	err = graphqlutil.Parse(apiResponse, &syncIntegrationResponse)
 	if err != nil {
 		return err
 	}
@@ -236,7 +287,7 @@ func SyncIntegration(regionUrl string, accessToken string, organizationId string
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := SyncIntegrationProperties(*inputFm, regionUrl, accessToken, organizationId, syncIntegrationsResponse.Integration.Id, jsonInput); err != nil {
+			if err := SyncIntegrationProperties(*inputFm, regionUrl, accessToken, organizationId, syncIntegrationResponse.Integration.Id, jsonInput); err != nil {
 				fmt.Printf("Error syncing properties: %v\n", err)
 			}
 		}()
@@ -251,7 +302,7 @@ func SyncIntegration(regionUrl string, accessToken string, organizationId string
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := SyncIntegrationEvents(*inputFm, regionUrl, accessToken, organizationId, syncIntegrationsResponse.Integration.Id, jsonInput); err != nil {
+			if err := SyncIntegrationEvents(*inputFm, regionUrl, accessToken, organizationId, syncIntegrationResponse.Integration.Id, jsonInput); err != nil {
 				fmt.Printf("Error syncing events: %v\n", err)
 			}
 		}()
@@ -266,7 +317,7 @@ func SyncIntegration(regionUrl string, accessToken string, organizationId string
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := SyncIntegrationData(*inputFm, regionUrl, accessToken, organizationId, syncIntegrationsResponse.Integration.Id, jsonInput); err != nil {
+			if err := SyncIntegrationData(*inputFm, regionUrl, accessToken, organizationId, syncIntegrationResponse.Integration.Id, jsonInput); err != nil {
 				fmt.Printf("Error syncing data: %v\n", err)
 			}
 		}()
@@ -281,7 +332,7 @@ func SyncIntegration(regionUrl string, accessToken string, organizationId string
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := SyncIntegrationSlots(*inputFm, regionUrl, accessToken, organizationId, syncIntegrationsResponse.Integration.Id, jsonInput); err != nil {
+			if err := SyncIntegrationSlots(*inputFm, regionUrl, accessToken, organizationId, syncIntegrationResponse.Integration.Id, jsonInput); err != nil {
 				fmt.Printf("Error syncing slots: %v\n", err)
 			}
 		}()
@@ -473,6 +524,74 @@ func SyncIntegrationSlots(fm fileutil.FileManager, regionUrl string, accessToken
 	return nil
 }
 
+func GetIntegration(regionUrl string, accessToken string, organizationId string, path string, id string) error {
+	client := graphqlutil.NewClient()
+
+	headers := map[string]string{
+		"Authorization": "Bearer " + accessToken,
+	}
+
+	variables := map[string]interface{}{
+		"organizationId": organizationId,
+		"integrationId":  id,
+	}
+
+	apiResponse, err := client.Execute(
+		regionUrl,
+		headers,
+		integrationQuery,
+		variables,
+	)
+	if err != nil {
+		return errors.New("failed to fetch projects: " + err.Error())
+	}
+
+	var integratioResponse IntegrationResponse
+	err = graphqlutil.Parse(apiResponse, &integratioResponse)
+	if err != nil {
+		return err
+	}
+
+	if len(integratioResponse.Integration.Id) == 0 {
+		return errors.New("no integration found")
+	}
+
+	integration, properties, data, events, slots := mapIntegrationResponseToModel(integratioResponse)
+
+	integrationFileName := "integration.json"
+	propertiesFileName := "properties.json"
+	dataFileName := "data.json"
+	eventsFileName := "events.json"
+	slotsFileName := "slots.json"
+
+	inputFm, err := fileutil.NewFileManager(&path)
+	if err != nil {
+		return err
+	}
+
+	if err := inputFm.SaveToFile(integrationFileName, integration); err != nil {
+		return err
+	}
+
+	if err := inputFm.SaveToFile(propertiesFileName, properties); err != nil {
+		return err
+	}
+
+	if err := inputFm.SaveToFile(dataFileName, data); err != nil {
+		return err
+	}
+
+	if err := inputFm.SaveToFile(eventsFileName, events); err != nil {
+		return err
+	}
+
+	if err := inputFm.SaveToFile(slotsFileName, slots); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func mapIntegrationsResponseToModel(response IntegrationsResponse) []IntegrationModel {
 	var integrationModels []IntegrationModel
 	for _, integration := range response.Integrations {
@@ -537,4 +656,63 @@ func mapIntegrationsResponseToModel(response IntegrationsResponse) []Integration
 		integrationModels = append(integrationModels, integrationModel)
 	}
 	return integrationModels
+}
+
+func mapIntegrationResponseToModel(response IntegrationResponse) (IntegrationModel, []IntegrationPropertyModel, []IntegrationDataModel, []IntegrationEventModel, []IntegrationSlotModel) {
+	var properties []IntegrationPropertyModel
+	for _, prop := range response.Integration.Properties {
+		properties = append(properties, IntegrationPropertyModel{
+			Key:              prop.Key,
+			Value:            prop.Value,
+			Type:             prop.Type,
+			Description:      prop.Description,
+			Deprecated:       prop.Deprecated,
+			DeprecatedReason: prop.DeprecatedReason,
+		})
+	}
+
+	var data []IntegrationDataModel
+	for _, dataItem := range response.Integration.Data {
+		data = append(data, IntegrationDataModel{
+			Key:              dataItem.Key,
+			Type:             dataItem.Type,
+			Description:      dataItem.Description,
+			Deprecated:       dataItem.Deprecated,
+			DeprecatedReason: dataItem.DeprecatedReason,
+		})
+	}
+
+	var events []IntegrationEventModel
+	for _, event := range response.Integration.Events {
+		events = append(events, IntegrationEventModel{
+			Event:            event.Event,
+			Description:      event.Description,
+			Deprecated:       event.Deprecated,
+			DeprecatedReason: event.DeprecatedReason,
+		})
+	}
+
+	var slots []IntegrationSlotModel
+	for _, slot := range response.Integration.Slots {
+		slots = append(slots, IntegrationSlotModel{
+			Slot:             slot.Slot,
+			Description:      slot.Description,
+			Deprecated:       slot.Deprecated,
+			DeprecatedReason: slot.DeprecatedReason,
+		})
+	}
+
+	integrationModel := IntegrationModel{
+		Name:             response.Integration.Name,
+		KeyType:          response.Integration.KeyType,
+		Version:          response.Integration.Version,
+		Id:               response.Integration.Id,
+		PlatformSupport:  response.Integration.PlatformSupport,
+		Kind:             response.Integration.Kind,
+		Public:           response.Integration.Public,
+		Deprecated:       response.Integration.Deprecated,
+		DeprecatedReason: response.Integration.DeprecatedReason,
+	}
+
+	return integrationModel, properties, data, events, slots
 }

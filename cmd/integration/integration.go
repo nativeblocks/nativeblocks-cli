@@ -26,6 +26,7 @@ func IntegrationCmd() *cobra.Command {
 
 	cmd.AddCommand(integrationListCmd())
 	cmd.AddCommand(integrationSyncCmd())
+	cmd.AddCommand(integrationGetCmd())
 
 	return cmd
 }
@@ -87,10 +88,10 @@ func integrationListCmd() *cobra.Command {
 }
 
 func integrationSyncCmd() *cobra.Command {
-	var directory string
+	var path string
 	cmd := &cobra.Command{
 		Use:   "sync",
-		Short: "Get integration sync",
+		Short: "Sync integration",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			fm, err := fileutil.NewFileManager(nil)
 			if err != nil {
@@ -112,7 +113,7 @@ func integrationSyncCmd() *cobra.Command {
 				return err
 			}
 
-			err = SyncIntegration(region.Url, auth.AccessToken, organization.Id, directory)
+			err = SyncIntegration(region.Url, auth.AccessToken, organization.Id, path)
 			if err != nil {
 				return err
 			}
@@ -122,8 +123,50 @@ func integrationSyncCmd() *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVarP(&directory, "directory", "d", "", "Integration working directory")
-	cmd.MarkFlagRequired("keyType")
-	cmd.MarkFlagRequired("directory")
+	cmd.Flags().StringVarP(&path, "path", "p", "", "Integration working path")
+	cmd.MarkFlagRequired("path")
+	return cmd
+}
+
+func integrationGetCmd() *cobra.Command {
+	var id, path string
+	cmd := &cobra.Command{
+		Use:   "get",
+		Short: "Get integration",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fm, err := fileutil.NewFileManager(nil)
+			if err != nil {
+				return err
+			}
+
+			region, err := region.GetRegion(*fm)
+			if err != nil {
+				return err
+			}
+
+			auth, err := auth.AuthGet(*fm)
+			if err != nil {
+				return err
+			}
+
+			organization, err := organization.GetOrganization(*fm)
+			if err != nil {
+				return err
+			}
+
+			err = GetIntegration(region.Url, auth.AccessToken, organization.Id, path, id)
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("Integration successfully synced \n")
+
+			return nil
+		},
+	}
+	cmd.Flags().StringVarP(&id, "integrationId", "i", "", "Integration id")
+	cmd.Flags().StringVarP(&path, "path", "p", "", "Integration working path")
+	cmd.MarkFlagRequired("id")
+	cmd.MarkFlagRequired("path")
 	return cmd
 }
