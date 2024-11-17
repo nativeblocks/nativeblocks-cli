@@ -573,14 +573,26 @@ func findIntegrations(dirPath string) map[string]interface{} {
 			}
 		}
 
-		if integrationItem.KeyType != "" {
-			result[integrationItem.KeyType] = map[string]interface{}{
-				"keyType":    integrationItem.KeyType,
-				"version":    integrationItem.Version,
-				"properties": properties,
-				"data":       data,
-				"events":     events,
-				"slots":      slots,
+		if integrationItem.Kind == "BLOCK" {
+			if integrationItem.KeyType != "" {
+				result[integrationItem.KeyType] = map[string]interface{}{
+					"keyType":    integrationItem.KeyType,
+					"version":    integrationItem.Version,
+					"properties": properties,
+					"data":       data,
+					"events":     events,
+					"slots":      slots,
+				}
+			}
+		} else {
+			if integrationItem.KeyType != "" {
+				result[integrationItem.KeyType] = map[string]interface{}{
+					"keyType":    integrationItem.KeyType,
+					"version":    integrationItem.Version,
+					"properties": properties,
+					"data":       data,
+					"events":     events,
+				}
 			}
 		}
 

@@ -187,16 +187,16 @@ func projectSchemaGenCmd() *cobra.Command {
 						"events":     installedIntegration.IntegrationEvents,
 					}
 
-					if block["data"] == nil {
+					if installedIntegration.IntegrationData == nil {
 						block["data"] = []interface{}{}
 					}
-					if block["properties"] == nil {
+					if installedIntegration.IntegrationProperties == nil {
 						block["properties"] = []interface{}{}
 					}
-					if block["slots"] == nil {
+					if installedIntegration.IntegrationSlots == nil {
 						block["slots"] = []interface{}{}
 					}
-					if block["events"] == nil {
+					if installedIntegration.IntegrationEvents == nil {
 						block["events"] = []interface{}{}
 					}
 
@@ -224,13 +224,13 @@ func projectSchemaGenCmd() *cobra.Command {
 						"events":     installedIntegration.IntegrationEvents,
 					}
 
-					if action["data"] == nil {
+					if installedIntegration.IntegrationData == nil {
 						action["data"] = []interface{}{}
 					}
-					if action["properties"] == nil {
+					if installedIntegration.IntegrationProperties == nil {
 						action["properties"] = []interface{}{}
 					}
-					if action["events"] == nil {
+					if installedIntegration.IntegrationEvents == nil {
 						action["events"] = []interface{}{}
 					}
 
