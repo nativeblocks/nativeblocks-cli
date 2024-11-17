@@ -1,13 +1,13 @@
-package project
+package projectModule
 
 import (
 	"errors"
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/nativeblocks/cli/cmd/auth"
-	"github.com/nativeblocks/cli/cmd/organization"
-	"github.com/nativeblocks/cli/cmd/region"
+	"github.com/nativeblocks/cli/cmd/authModule"
+	"github.com/nativeblocks/cli/cmd/organizationModule"
+	"github.com/nativeblocks/cli/cmd/regionModule"
 	"github.com/nativeblocks/cli/library/fileutil"
 	"github.com/spf13/cobra"
 )
@@ -34,22 +34,22 @@ func projectSetCmd() *cobra.Command {
 				return err
 			}
 
-			region, err := region.GetRegion(*fm)
+			region, err := regionModule.GetRegion(*fm)
 			if err != nil {
 				return err
 			}
 
-			auth, err := auth.AuthGet(*fm)
+			auth, err := authModule.AuthGet(*fm)
 			if err != nil {
 				return err
 			}
 
-			organization, err := organization.GetOrganization(*fm)
+			organization, err := organizationModule.GetOrganization(*fm)
 			if err != nil {
 				return err
 			}
 
-			projects, err := GetProjects(*fm, region.Url, auth.AccessToken, organization.Id)
+			projects, err := GetProjects(region.Url, auth.AccessToken, organization.Id)
 			if err != nil {
 				return err
 			}
@@ -74,7 +74,10 @@ func projectSetCmd() *cobra.Command {
 			}
 
 			selectedProj := optionMap[selection]
-			SelectProject(*fm, &selectedProj)
+			err = SelectProject(*fm, &selectedProj)
+			if err != nil {
+				return err
+			}
 
 			fmt.Printf("Selected project: %s (%s)\n", selectedProj.Name, selectedProj.Id)
 			if selectedProj.Id != "" {
@@ -136,17 +139,17 @@ func projectSchemaGenCmd() *cobra.Command {
 				if err != nil {
 					return err
 				}
-				region, err := region.GetRegion(*fm)
+				region, err := regionModule.GetRegion(*fm)
 				if err != nil {
 					return err
 				}
 
-				auth, err := auth.AuthGet(*fm)
+				auth, err := authModule.AuthGet(*fm)
 				if err != nil {
 					return err
 				}
 
-				organization, err := organization.GetOrganization(*fm)
+				organization, err := organizationModule.GetOrganization(*fm)
 				if err != nil {
 					return err
 				}
@@ -276,7 +279,7 @@ func projectSchemaGenCmd() *cobra.Command {
 	}
 	cmd.Flags().StringVarP(&edition, "edition", "e", "", "Edition type (cloud or community)")
 	cmd.Flags().StringVarP(&path, "path", "p", "", "Output path")
-	cmd.MarkFlagRequired("edition")
-	cmd.MarkFlagRequired("path")
+	_ = cmd.MarkFlagRequired("edition")
+	_ = cmd.MarkFlagRequired("path")
 	return cmd
 }

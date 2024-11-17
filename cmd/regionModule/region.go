@@ -1,4 +1,4 @@
-package region
+package regionModule
 
 import (
 	"fmt"
@@ -37,7 +37,10 @@ func regionSetCmd() *cobra.Command {
 				return err
 			}
 
-			SetRegion(*fm, args[0])
+			err = SetRegion(*fm, args[0])
+			if err != nil {
+				return err
+			}
 
 			fmt.Printf("Region URL set to: %s\n", args[0])
 			return nil

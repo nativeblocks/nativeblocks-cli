@@ -1,4 +1,4 @@
-package project
+package projectModule
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/nativeblocks/cli/cmd/integration"
+	"github.com/nativeblocks/cli/cmd/integrationModule"
 )
 
 type Schema struct {
@@ -271,7 +271,7 @@ func generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockDat
 
 func getUniqueKeys[T comparable](sliceList []T) []T {
 	allKeys := make(map[T]bool)
-	list := []T{}
+	var list []T
 	for _, item := range sliceList {
 		if _, value := allKeys[item]; !value {
 			allKeys[item] = true
@@ -484,11 +484,11 @@ func findEvents(dirPath string) []string {
 func findIntegrations(dirPath string) map[string]interface{} {
 	result := make(map[string]interface{})
 
-	var integrationItem integration.IntegrationModel
-	var properties []IntegrationPropertyModel = make([]IntegrationPropertyModel, 0)
-	var data []IntegrationDataModel = make([]IntegrationDataModel, 0)
-	var slots []IntegrationSlotModel = make([]IntegrationSlotModel, 0)
-	var events []IntegrationEventModel = make([]IntegrationEventModel, 0)
+	var integrationItem integrationModule.IntegrationModel
+	var properties = make([]IntegrationPropertyModel, 0)
+	var data = make([]IntegrationDataModel, 0)
+	var slots = make([]IntegrationSlotModel, 0)
+	var events = make([]IntegrationEventModel, 0)
 	walkFunc := func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -505,7 +505,7 @@ func findIntegrations(dirPath string) map[string]interface{} {
 				return err
 			}
 
-			var jsonData integration.IntegrationModel
+			var jsonData integrationModule.IntegrationModel
 			if err := json.Unmarshal(fileContent, &jsonData); err != nil {
 				return fmt.Errorf("error parsing %s: %w", path, err)
 			}

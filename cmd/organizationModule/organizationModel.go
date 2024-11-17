@@ -1,4 +1,4 @@
-package organization
+package organizationModule
 
 type OrganizationModel struct {
 	Id   string `json:"id"`

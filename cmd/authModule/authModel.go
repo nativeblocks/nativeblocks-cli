@@ -1,4 +1,4 @@
-package auth
+package authModule
 
 type AuthModel struct {
 	AccessToken string `json:"accessToken"`

@@ -1,4 +1,4 @@
-package project
+package projectModule
 
 import (
 	"errors"
@@ -50,7 +50,7 @@ const installedIntegrationsQuery = `
 	}
 `
 
-func GetProjects(fm fileutil.FileManager, regionUrl string, accessToken string, organizationId string) ([]ProjectModel, error) {
+func GetProjects(regionUrl string, accessToken string, organizationId string) ([]ProjectModel, error) {
 	client := graphqlutil.NewClient()
 
 	headers := map[string]string{

@@ -1,9 +1,8 @@
-package auth
+package authModule
 
 import (
 	"fmt"
-
-	region "github.com/nativeblocks/cli/cmd/region"
+	"github.com/nativeblocks/cli/cmd/regionModule"
 	"github.com/nativeblocks/cli/library/fileutil"
 	"github.com/spf13/cobra"
 )
@@ -20,7 +19,7 @@ func AuthCmd() *cobra.Command {
 				return err
 			}
 
-			region, err := region.GetRegion(*fm)
+			region, err := regionModule.GetRegion(*fm)
 			if err != nil {
 				return err
 			}
@@ -41,8 +40,8 @@ func AuthCmd() *cobra.Command {
 
 	cmd.Flags().StringVarP(&username, "username", "u", "", "Username/Email")
 	cmd.Flags().StringVarP(&password, "password", "p", "", "Password")
-	cmd.MarkFlagRequired("username")
-	cmd.MarkFlagRequired("password")
+	_ = cmd.MarkFlagRequired("username")
+	_ = cmd.MarkFlagRequired("password")
 
 	return cmd
 }

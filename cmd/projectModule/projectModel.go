@@ -1,4 +1,4 @@
-package project
+package projectModule
 
 type ProjectModel struct {
 	Id       string        `json:"id"`

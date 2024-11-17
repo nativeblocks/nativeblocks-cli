@@ -1,4 +1,4 @@
-package region
+package regionModule
 
 import (
 	"errors"
@@ -17,10 +17,10 @@ func GetRegion(fm fileutil.FileManager) (*RegionModel, error) {
 }
 
 func SetRegion(fm fileutil.FileManager, url string) error {
-	fm.DeleteFile(RegionFileName)
-	fm.DeleteFile(AuthFileName)
-	fm.DeleteFile(OrganizationFileName)
-	fm.DeleteFile(ProjectFileName)
+	_ = fm.DeleteFile(RegionFileName)
+	_ = fm.DeleteFile(AuthFileName)
+	_ = fm.DeleteFile(OrganizationFileName)
+	_ = fm.DeleteFile(ProjectFileName)
 
 	region := RegionModel{Url: url}
 	if err := fm.SaveToFile(RegionFileName, region); err != nil {

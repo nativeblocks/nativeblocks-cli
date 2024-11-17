@@ -1,4 +1,4 @@
-package integration
+package integrationModule
 
 import (
 	"errors"
@@ -171,7 +171,7 @@ mutation syncIntegrationSlots($input: SyncIntegrationSlotsInput!) {
     }
 }`
 
-func GetIntegrations(fm fileutil.FileManager, regionUrl string, accessToken string, organizationId string, kind string, platformSupport string) ([]IntegrationModel, error) {
+func GetIntegrations(regionUrl string, accessToken string, organizationId string, kind string, platformSupport string) ([]IntegrationModel, error) {
 	client := graphqlutil.NewClient()
 
 	headers := map[string]string{
@@ -287,7 +287,7 @@ func SyncIntegration(regionUrl string, accessToken string, organizationId string
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := SyncIntegrationProperties(*inputFm, regionUrl, accessToken, organizationId, syncIntegrationResponse.Integration.Id, jsonInput); err != nil {
+			if err := SyncIntegrationProperties(regionUrl, accessToken, organizationId, syncIntegrationResponse.Integration.Id, jsonInput); err != nil {
 				fmt.Printf("Error syncing properties: %v\n", err)
 			}
 		}()
@@ -302,7 +302,7 @@ func SyncIntegration(regionUrl string, accessToken string, organizationId string
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := SyncIntegrationEvents(*inputFm, regionUrl, accessToken, organizationId, syncIntegrationResponse.Integration.Id, jsonInput); err != nil {
+			if err := SyncIntegrationEvents(regionUrl, accessToken, organizationId, syncIntegrationResponse.Integration.Id, jsonInput); err != nil {
 				fmt.Printf("Error syncing events: %v\n", err)
 			}
 		}()
@@ -317,7 +317,7 @@ func SyncIntegration(regionUrl string, accessToken string, organizationId string
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := SyncIntegrationData(*inputFm, regionUrl, accessToken, organizationId, syncIntegrationResponse.Integration.Id, jsonInput); err != nil {
+			if err := SyncIntegrationData(regionUrl, accessToken, organizationId, syncIntegrationResponse.Integration.Id, jsonInput); err != nil {
 				fmt.Printf("Error syncing data: %v\n", err)
 			}
 		}()
@@ -332,7 +332,7 @@ func SyncIntegration(regionUrl string, accessToken string, organizationId string
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := SyncIntegrationSlots(*inputFm, regionUrl, accessToken, organizationId, syncIntegrationResponse.Integration.Id, jsonInput); err != nil {
+			if err := SyncIntegrationSlots(regionUrl, accessToken, organizationId, syncIntegrationResponse.Integration.Id, jsonInput); err != nil {
 				fmt.Printf("Error syncing slots: %v\n", err)
 			}
 		}()
@@ -342,7 +342,7 @@ func SyncIntegration(regionUrl string, accessToken string, organizationId string
 	return nil
 }
 
-func SyncIntegrationProperties(fm fileutil.FileManager, regionUrl string, accessToken string, organizationId string, integrationId string, jsonInput []IntegrationPropertyModel) error {
+func SyncIntegrationProperties(regionUrl string, accessToken string, organizationId string, integrationId string, jsonInput []IntegrationPropertyModel) error {
 	if len(jsonInput) == 0 {
 		return nil
 	}
@@ -391,7 +391,7 @@ func SyncIntegrationProperties(fm fileutil.FileManager, regionUrl string, access
 	return nil
 }
 
-func SyncIntegrationEvents(fm fileutil.FileManager, regionUrl string, accessToken string, organizationId string, integrationId string, jsonInput []IntegrationEventModel) error {
+func SyncIntegrationEvents(regionUrl string, accessToken string, organizationId string, integrationId string, jsonInput []IntegrationEventModel) error {
 	if len(jsonInput) == 0 {
 		return nil
 	}
@@ -435,7 +435,7 @@ func SyncIntegrationEvents(fm fileutil.FileManager, regionUrl string, accessToke
 	return nil
 }
 
-func SyncIntegrationData(fm fileutil.FileManager, regionUrl string, accessToken string, organizationId string, integrationId string, jsonInput []IntegrationDataModel) error {
+func SyncIntegrationData(regionUrl string, accessToken string, organizationId string, integrationId string, jsonInput []IntegrationDataModel) error {
 	if len(jsonInput) == 0 {
 		return nil
 	}
@@ -480,7 +480,7 @@ func SyncIntegrationData(fm fileutil.FileManager, regionUrl string, accessToken 
 	return nil
 }
 
-func SyncIntegrationSlots(fm fileutil.FileManager, regionUrl string, accessToken string, organizationId string, integrationId string, jsonInput []IntegrationSlotModel) error {
+func SyncIntegrationSlots(regionUrl string, accessToken string, organizationId string, integrationId string, jsonInput []IntegrationSlotModel) error {
 	if len(jsonInput) == 0 {
 		return nil
 	}
@@ -546,17 +546,17 @@ func GetIntegration(regionUrl string, accessToken string, organizationId string,
 		return errors.New("failed to fetch projects: " + err.Error())
 	}
 
-	var integratioResponse IntegrationResponse
-	err = graphqlutil.Parse(apiResponse, &integratioResponse)
+	var integrationResponse IntegrationResponse
+	err = graphqlutil.Parse(apiResponse, &integrationResponse)
 	if err != nil {
 		return err
 	}
 
-	if len(integratioResponse.Integration.Id) == 0 {
+	if len(integrationResponse.Integration.Id) == 0 {
 		return errors.New("no integration found")
 	}
 
-	integration, properties, data, events, slots := mapIntegrationResponseToModel(integratioResponse)
+	integration, properties, data, events, slots := mapIntegrationResponseToModel(integrationResponse)
 
 	integrationFileName := "integration.json"
 	propertiesFileName := "properties.json"

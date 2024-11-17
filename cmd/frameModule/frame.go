@@ -1,12 +1,12 @@
-package frame
+package frameModule
 
 import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/nativeblocks/cli/cmd/auth"
-	"github.com/nativeblocks/cli/cmd/project"
-	"github.com/nativeblocks/cli/cmd/region"
+	"github.com/nativeblocks/cli/cmd/authModule"
+	"github.com/nativeblocks/cli/cmd/projectModule"
+	"github.com/nativeblocks/cli/cmd/regionModule"
 	"github.com/nativeblocks/cli/library/fileutil"
 	"github.com/spf13/cobra"
 )
@@ -69,7 +69,7 @@ func genCommand() *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&path, "path", "p", "", "Frame working path")
-	cmd.MarkFlagRequired("path")
+	_ = cmd.MarkFlagRequired("path")
 
 	return cmd
 }
@@ -85,17 +85,17 @@ func pushCommand() *cobra.Command {
 				return err
 			}
 
-			region, err := region.GetRegion(*baseFm)
+			region, err := regionModule.GetRegion(*baseFm)
 			if err != nil {
 				return err
 			}
 
-			auth, err := auth.AuthGet(*baseFm)
+			auth, err := authModule.AuthGet(*baseFm)
 			if err != nil {
 				return err
 			}
 
-			project, err := project.GetProject(*baseFm)
+			project, err := projectModule.GetProject(*baseFm)
 			if err != nil {
 				return err
 			}
@@ -136,7 +136,7 @@ func pushCommand() *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&path, "path", "p", "", "Frame working path")
-	cmd.MarkFlagRequired("path")
+	_ = cmd.MarkFlagRequired("path")
 
 	return cmd
 }
@@ -152,17 +152,17 @@ func pullCommand() *cobra.Command {
 				return err
 			}
 
-			region, err := region.GetRegion(*baseFm)
+			region, err := regionModule.GetRegion(*baseFm)
 			if err != nil {
 				return err
 			}
 
-			auth, err := auth.AuthGet(*baseFm)
+			auth, err := authModule.AuthGet(*baseFm)
 			if err != nil {
 				return err
 			}
 
-			project, err := project.GetProject(*baseFm)
+			project, err := projectModule.GetProject(*baseFm)
 			if err != nil {
 				return err
 			}
@@ -202,7 +202,7 @@ func pullCommand() *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&path, "path", "p", "", "Frame working path")
-	cmd.MarkFlagRequired("path")
+	_ = cmd.MarkFlagRequired("path")
 
 	return cmd
 }

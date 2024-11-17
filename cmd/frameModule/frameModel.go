@@ -1,4 +1,4 @@
-package frame
+package frameModule
 
 type FrameWrapper struct {
 	Frame FrameModel `json:"frame"`

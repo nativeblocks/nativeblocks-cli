@@ -1,4 +1,4 @@
-package frame
+package frameModule
 
 import (
 	"github.com/google/uuid"

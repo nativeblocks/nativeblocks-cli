@@ -1,4 +1,4 @@
-package frame
+package frameModule
 
 func findActionTriggerChildren(triggers []ActionTriggerModel, parentId string) []ActionTriggerDSLModel {
 	var children []ActionTriggerDSLModel

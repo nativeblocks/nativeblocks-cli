@@ -1,12 +1,12 @@
-package organization
+package organizationModule
 
 import (
 	"errors"
 	"fmt"
+	"github.com/nativeblocks/cli/cmd/authModule"
+	"github.com/nativeblocks/cli/cmd/regionModule"
 
 	"github.com/AlecAivazis/survey/v2"
-	auth "github.com/nativeblocks/cli/cmd/auth"
-	region "github.com/nativeblocks/cli/cmd/region"
 	"github.com/nativeblocks/cli/library/fileutil"
 	"github.com/spf13/cobra"
 )
@@ -32,17 +32,17 @@ func organizationSetCmd() *cobra.Command {
 				return err
 			}
 
-			region, err := region.GetRegion(*fm)
+			region, err := regionModule.GetRegion(*fm)
 			if err != nil {
 				return err
 			}
 
-			auth, err := auth.AuthGet(*fm)
+			auth, err := authModule.AuthGet(*fm)
 			if err != nil {
 				return err
 			}
 
-			orgs, err := GetOrganizations(*fm, region.Url, auth.AccessToken)
+			orgs, err := GetOrganizations(region.Url, auth.AccessToken)
 			if err != nil {
 				return err
 			}
@@ -67,7 +67,10 @@ func organizationSetCmd() *cobra.Command {
 			}
 
 			selectedOrg := optionMap[selection]
-			SelectOrganization(fm, &selectedOrg)
+			err = SelectOrganization(fm, &selectedOrg)
+			if err != nil {
+				return err
+			}
 
 			fmt.Printf("Selected organization: %s (%s)\n", selectedOrg.Name, selectedOrg.Id)
 			return nil

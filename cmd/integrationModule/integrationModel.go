@@ -1,4 +1,4 @@
-package integration
+package integrationModule
 
 type IntegrationModel struct {
 	Id               string                     `json:"id"`
