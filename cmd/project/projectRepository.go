@@ -127,8 +127,5 @@ func GetInstalledIntegration(regionUrl string, accessToken string, organizationI
 		return nil, err
 	}
 
-	if len(installedIntegrationResponse.IntegrationsInstalled) == 0 {
-		return nil, errors.New("no integrations found")
-	}
 	return mapIntegrationsResponseToModel(installedIntegrationResponse), nil
 }

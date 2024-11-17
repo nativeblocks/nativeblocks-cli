@@ -39,7 +39,7 @@ type Trigger struct {
 	Triggers           []Trigger        `json:"triggers"`
 }
 
-func generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockData, actionProperties, actionData []string) (Schema, error) {
+func generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockData, blockSlots, blockEvents, actionProperties, actionData []string) (Schema, error) {
 	baseSchema := Schema{
 		Schema:   "http://json-schema.org/draft-07/schema#",
 		Type:     "object",
@@ -112,8 +112,9 @@ func generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockDat
 						"items": map[string]interface{}{
 							"type": "object",
 							"properties": map[string]interface{}{
-								"slot": map[string]string{
+								"slot": map[string]interface{}{
 									"type": "string",
+									"enum": getUniqueKeys(blockSlots),
 								},
 							},
 						},
@@ -173,8 +174,9 @@ func generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockDat
 							"type":     "object",
 							"required": []string{"event", "triggers"},
 							"properties": map[string]interface{}{
-								"event": map[string]string{
+								"event": map[string]interface{}{
 									"type": "string",
+									"enum": getUniqueKeys(blockEvents),
 								},
 								"triggers": map[string]interface{}{
 									"type": "array",
@@ -277,12 +279,6 @@ func getUniqueKeys[T comparable](sliceList []T) []T {
 	return list
 }
 
-type MetaItem struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-	Type  string `json:"type"`
-}
-
 func findKeyTypes(dirPath string) []string {
 	var keyTypes []string
 	walkFunc := func(path string, info fs.FileInfo, err error) error {
@@ -347,7 +343,6 @@ func findData(dirPath string) []string {
 
 			for _, item := range jsonData {
 				key, _ := item["key"].(string)
-				// dataType, _ := item[`type`].(string)
 				data = append(data, key)
 			}
 		}
@@ -388,8 +383,6 @@ func findProperties(dirPath string) []string {
 
 			for _, item := range jsonData {
 				key, _ := item["key"].(string)
-				// value, _ := item["value"].(string)
-				// dataType, _ := item["type"].(string)
 				properties = append(properties, key)
 			}
 		}
@@ -404,4 +397,84 @@ func findProperties(dirPath string) []string {
 	}
 
 	return properties
+}
+
+func findSlots(dirPath string) []string {
+	var slots []string
+	walkFunc := func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		if info.Name() == "slots.json" {
+			fileContent, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var jsonData []map[string]interface{}
+			if err := json.Unmarshal(fileContent, &jsonData); err != nil {
+				return fmt.Errorf("error parsing %s: %w", path, err)
+			}
+
+			for _, item := range jsonData {
+				key, _ := item["slot"].(string)
+				slots = append(slots, key)
+			}
+		}
+
+		return nil
+	}
+
+	err := filepath.Walk(dirPath, walkFunc)
+	if err != nil {
+		fmt.Printf("Error walking path: %v\n", err)
+		return nil
+	}
+
+	return slots
+}
+
+func findEvents(dirPath string) []string {
+	var events []string
+	walkFunc := func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		if info.Name() == "events.json" {
+			fileContent, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var jsonData []map[string]interface{}
+			if err := json.Unmarshal(fileContent, &jsonData); err != nil {
+				return fmt.Errorf("error parsing %s: %w", path, err)
+			}
+
+			for _, item := range jsonData {
+				key, _ := item["event"].(string)
+				events = append(events, key)
+			}
+		}
+
+		return nil
+	}
+
+	err := filepath.Walk(dirPath, walkFunc)
+	if err != nil {
+		fmt.Printf("Error walking path: %v\n", err)
+		return nil
+	}
+
+	return events
 }

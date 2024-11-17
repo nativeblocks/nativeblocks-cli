@@ -121,6 +121,8 @@ func projectSchemaGenCmd() *cobra.Command {
 			blockKeyTypes := make([]string, 0)
 			blockProperties := make([]string, 0)
 			blockData := make([]string, 0)
+			blockSlots := make([]string, 0)
+			blockEvents := make([]string, 0)
 
 			actionKeyTypes := make([]string, 0)
 			actionProperties := make([]string, 0)
@@ -159,12 +161,16 @@ func projectSchemaGenCmd() *cobra.Command {
 				for _, installedIntegration := range installedBlocks {
 					blockKeyTypes = append(blockKeyTypes, installedIntegration.IntegrationKeyType)
 					for _, property := range installedIntegration.IntegrationProperties {
-						meta := MetaItem(property)
-						blockProperties = append(blockProperties, meta.Key)
+						blockProperties = append(blockProperties, property.Key)
 					}
 					for _, dataItem := range installedIntegration.IntegrationData {
-						meta := MetaItem{Key: dataItem.Key, Value: "", Type: dataItem.Type}
-						blockData = append(blockData, meta.Key)
+						blockData = append(blockData, dataItem.Key)
+					}
+					for _, slot := range installedIntegration.IntegrationSlots {
+						blockSlots = append(blockSlots, slot.Slot)
+					}
+					for _, event := range installedIntegration.IntegrationEvents {
+						blockEvents = append(blockEvents, event.Event)
 					}
 				}
 
@@ -176,12 +182,10 @@ func projectSchemaGenCmd() *cobra.Command {
 				for _, installedIntegration := range installedActions {
 					actionKeyTypes = append(actionKeyTypes, installedIntegration.IntegrationKeyType)
 					for _, property := range installedIntegration.IntegrationProperties {
-						meta := MetaItem(property)
-						actionProperties = append(actionProperties, meta.Key)
+						actionProperties = append(actionProperties, property.Key)
 					}
 					for _, dataItem := range installedIntegration.IntegrationData {
-						meta := MetaItem{Key: dataItem.Key, Value: "", Type: dataItem.Type}
-						actionData = append(actionData, meta.Key)
+						actionData = append(actionData, dataItem.Key)
 					}
 				}
 			} else {
@@ -190,6 +194,8 @@ func projectSchemaGenCmd() *cobra.Command {
 					blockKeyTypes = findKeyTypes(inputFm.BaseDir + "/integrations/block")
 					blockProperties = findProperties(inputFm.BaseDir + "/integrations/block")
 					blockData = findData(inputFm.BaseDir + "/integrations/block")
+					blockSlots = findSlots(inputFm.BaseDir + "/integrations/block")
+					blockEvents = findEvents(inputFm.BaseDir + "/integrations/block")
 				}
 				actionExist := inputFm.FileExists("integrations/action")
 				if actionExist {
@@ -200,7 +206,7 @@ func projectSchemaGenCmd() *cobra.Command {
 				blockKeyTypes = append(blockKeyTypes, "ROOT")
 			}
 
-			schema, err := generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockData, actionProperties, actionData)
+			schema, err := generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockData, blockSlots, blockEvents, actionProperties, actionData)
 			if err != nil {
 				return nil
 			}
