@@ -250,6 +250,11 @@ func generateFrame(frameDSL FrameDSLModel) (FrameProductionDataWrapper, error) {
 	}
 
 	var actions []ActionModel
+
+	if len(frameDSL.Blocks) > 0 && frameDSL.Blocks[0].KeyType != "ROOT" {
+		return FrameProductionDataWrapper{}, errors.New("first block's keyType must be 'ROOT'")
+	}
+
 	blocks, err := processBlocks(frameId, frameDSL.Blocks, "", []BlockSlotModel{}, variables, func(blockActions []ActionModel, err error) {
 		actions = append(actions, blockActions...)
 	})
