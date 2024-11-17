@@ -97,7 +97,7 @@ func GetProject(fm fileutil.FileManager) (*ProjectModel, error) {
 	return &model, nil
 }
 
-func GetInstalledIntegration(regionUrl string, accessToken string, organizationId string, projectId string, kind string) ([]IntegrationModel, error) {
+func GetInstalledIntegration(regionUrl string, accessToken string, organizationId string, projectId string, kind string) ([]IntegrationProjectModel, error) {
 
 	client := graphqlutil.NewClient()
 

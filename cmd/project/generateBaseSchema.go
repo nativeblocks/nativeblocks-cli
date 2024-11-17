@@ -6,6 +6,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+
+	"github.com/nativeblocks/cli/cmd/integration"
 )
 
 type Schema struct {
@@ -477,4 +479,119 @@ func findEvents(dirPath string) []string {
 	}
 
 	return events
+}
+
+func findIntegrations(dirPath string) map[string]interface{} {
+	result := make(map[string]interface{})
+
+	var integrationItem integration.IntegrationModel
+	var properties []IntegrationPropertyModel = make([]IntegrationPropertyModel, 0)
+	var data []IntegrationDataModel = make([]IntegrationDataModel, 0)
+	var slots []IntegrationSlotModel = make([]IntegrationSlotModel, 0)
+	var events []IntegrationEventModel = make([]IntegrationEventModel, 0)
+	walkFunc := func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		if info.Name() == "integration.json" {
+			fileContent, err := os.ReadFile(path)
+
+			if err != nil {
+				return err
+			}
+
+			var jsonData integration.IntegrationModel
+			if err := json.Unmarshal(fileContent, &jsonData); err != nil {
+				return fmt.Errorf("error parsing %s: %w", path, err)
+			}
+			integrationItem = jsonData
+		}
+
+		if info.Name() == "properties.json" {
+			fileContent, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var jsonData []IntegrationPropertyModel
+			if err := json.Unmarshal(fileContent, &jsonData); err != nil {
+				return fmt.Errorf("error parsing %s: %w", path, err)
+			}
+			if jsonData != nil {
+				properties = jsonData
+			}
+		}
+
+		if info.Name() == "data.json" {
+			fileContent, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var jsonData []IntegrationDataModel
+			if err := json.Unmarshal(fileContent, &jsonData); err != nil {
+				return fmt.Errorf("error parsing %s: %w", path, err)
+			}
+			if jsonData != nil {
+				data = jsonData
+			}
+		}
+
+		if info.Name() == "slots.json" {
+			fileContent, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var jsonData []IntegrationSlotModel
+			if err := json.Unmarshal(fileContent, &jsonData); err != nil {
+				return fmt.Errorf("error parsing %s: %w", path, err)
+			}
+			if jsonData != nil {
+				slots = jsonData
+			}
+
+		}
+
+		if info.Name() == "events.json" {
+			fileContent, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var jsonData []IntegrationEventModel
+			if err := json.Unmarshal(fileContent, &jsonData); err != nil {
+				return fmt.Errorf("error parsing %s: %w", path, err)
+			}
+			if jsonData != nil {
+				events = jsonData
+			}
+		}
+
+		if integrationItem.KeyType != "" {
+			result[integrationItem.KeyType] = map[string]interface{}{
+				"keyType":    integrationItem.KeyType,
+				"version":    integrationItem.Version,
+				"properties": properties,
+				"data":       data,
+				"events":     events,
+				"slots":      slots,
+			}
+		}
+
+		return nil
+	}
+
+	err := filepath.Walk(dirPath, walkFunc)
+	if err != nil {
+		fmt.Printf("Error walking path: %v\n", err)
+		return nil
+	}
+
+	return result
 }

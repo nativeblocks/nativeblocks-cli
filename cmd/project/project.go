@@ -128,6 +128,9 @@ func projectSchemaGenCmd() *cobra.Command {
 			actionProperties := make([]string, 0)
 			actionData := make([]string, 0)
 
+			blocks := make(map[string]interface{})
+			actions := make(map[string]interface{})
+
 			if edition == "cloud" || edition == "Cloud" || edition == "CLOUD" {
 				fm, err := fileutil.NewFileManager(nil)
 				if err != nil {
@@ -172,6 +175,29 @@ func projectSchemaGenCmd() *cobra.Command {
 					for _, event := range installedIntegration.IntegrationEvents {
 						blockEvents = append(blockEvents, event.Event)
 					}
+					block := map[string]interface{}{
+						"keyType":    installedIntegration.IntegrationKeyType,
+						"version":    installedIntegration.IntegrationVersion,
+						"data":       installedIntegration.IntegrationData,
+						"properties": installedIntegration.IntegrationProperties,
+						"slots":      installedIntegration.IntegrationSlots,
+						"events":     installedIntegration.IntegrationEvents,
+					}
+
+					if block["data"] == nil {
+						block["data"] = []interface{}{}
+					}
+					if block["properties"] == nil {
+						block["properties"] = []interface{}{}
+					}
+					if block["slots"] == nil {
+						block["slots"] = []interface{}{}
+					}
+					if block["events"] == nil {
+						block["events"] = []interface{}{}
+					}
+
+					blocks[installedIntegration.IntegrationKeyType] = block
 				}
 
 				installedActions, err := GetInstalledIntegration(region.Url, auth.AccessToken, organization.Id, project.Id, "ACTION")
@@ -187,6 +213,25 @@ func projectSchemaGenCmd() *cobra.Command {
 					for _, dataItem := range installedIntegration.IntegrationData {
 						actionData = append(actionData, dataItem.Key)
 					}
+					action := map[string]interface{}{
+						"keyType":    installedIntegration.IntegrationKeyType,
+						"version":    installedIntegration.IntegrationVersion,
+						"data":       installedIntegration.IntegrationData,
+						"properties": installedIntegration.IntegrationProperties,
+						"events":     installedIntegration.IntegrationEvents,
+					}
+
+					if action["data"] == nil {
+						action["data"] = []interface{}{}
+					}
+					if action["properties"] == nil {
+						action["properties"] = []interface{}{}
+					}
+					if action["events"] == nil {
+						action["events"] = []interface{}{}
+					}
+
+					actions[installedIntegration.IntegrationKeyType] = action
 				}
 			} else {
 				blockExist := inputFm.FileExists("integrations/block")
@@ -196,12 +241,15 @@ func projectSchemaGenCmd() *cobra.Command {
 					blockData = findData(inputFm.BaseDir + "/integrations/block")
 					blockSlots = findSlots(inputFm.BaseDir + "/integrations/block")
 					blockEvents = findEvents(inputFm.BaseDir + "/integrations/block")
+
+					blocks = findIntegrations(inputFm.BaseDir + "/integrations/block")
 				}
 				actionExist := inputFm.FileExists("integrations/action")
 				if actionExist {
 					actionKeyTypes = findKeyTypes(inputFm.BaseDir + "/integrations/action")
 					actionProperties = findProperties(inputFm.BaseDir + "/integrations/action")
 					actionData = findData(inputFm.BaseDir + "/integrations/action")
+					actions = findIntegrations(inputFm.BaseDir + "/integrations/action")
 				}
 				blockKeyTypes = append(blockKeyTypes, "ROOT")
 			}
@@ -214,6 +262,14 @@ func projectSchemaGenCmd() *cobra.Command {
 			if err := inputFm.SaveToFile("schema.json", schema); err != nil {
 				return err
 			}
+
+			if err := inputFm.SaveToFile("blocks.json", blocks); err != nil {
+				return err
+			}
+			if err := inputFm.SaveToFile("actions.json", actions); err != nil {
+				return err
+			}
+
 			fmt.Printf("Schema file generated successfully at %s \n", inputFm.BaseDir)
 			return nil
 		},
