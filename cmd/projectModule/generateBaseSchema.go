@@ -272,7 +272,7 @@ func generateBaseSchema(version string, blockKeyTypes, actionKeyTypes, blockProp
 
 func getUniqueKeys[T comparable](sliceList []T) []T {
 	allKeys := make(map[T]bool)
-	var list []T
+	var list = make([]T, 0)
 	for _, item := range sliceList {
 		if _, value := allKeys[item]; !value {
 			allKeys[item] = true
@@ -283,7 +283,7 @@ func getUniqueKeys[T comparable](sliceList []T) []T {
 }
 
 func findKeyTypes(dirPath string) []string {
-	var keyTypes []string
+	var keyTypes = make([]string, 0)
 	walkFunc := func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -323,7 +323,7 @@ func findKeyTypes(dirPath string) []string {
 }
 
 func findData(dirPath string) []string {
-	var data []string
+	var data = make([]string, 0)
 	walkFunc := func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -363,7 +363,7 @@ func findData(dirPath string) []string {
 }
 
 func findProperties(dirPath string) []string {
-	var properties []string
+	var properties = make([]string, 0)
 	walkFunc := func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -403,7 +403,7 @@ func findProperties(dirPath string) []string {
 }
 
 func findSlots(dirPath string) []string {
-	var slots []string
+	var slots = make([]string, 0)
 	walkFunc := func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -443,7 +443,7 @@ func findSlots(dirPath string) []string {
 }
 
 func findEvents(dirPath string) []string {
-	var events []string
+	var events = make([]string, 0)
 	walkFunc := func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
