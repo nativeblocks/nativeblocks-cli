@@ -3,6 +3,7 @@ package projectModule
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/nativeblocks/cli/cmd/authModule"
@@ -134,6 +135,10 @@ func projectSchemaGenCmd() *cobra.Command {
 			blocks := make(map[string]interface{})
 			actions := make(map[string]interface{})
 
+			version := time.Now().UTC().Format("2006-01-02 15:04")
+			blocks["schema-version"] = version
+			actions["schema-version"] = version
+
 			if edition == "cloud" || edition == "Cloud" || edition == "CLOUD" {
 				fm, err := fileutil.NewFileManager(nil)
 				if err != nil {
@@ -257,7 +262,7 @@ func projectSchemaGenCmd() *cobra.Command {
 				blockKeyTypes = append(blockKeyTypes, "ROOT")
 			}
 
-			schema, err := generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockData, blockSlots, blockEvents, actionProperties, actionData)
+			schema, err := generateBaseSchema(version, blockKeyTypes, actionKeyTypes, blockProperties, blockData, blockSlots, blockEvents, actionProperties, actionData)
 			if err != nil {
 				return nil
 			}

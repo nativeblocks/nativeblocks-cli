@@ -3,19 +3,19 @@ package projectModule
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/nativeblocks/cli/cmd/integrationModule"
 	"io/fs"
 	"os"
 	"path/filepath"
-
-	"github.com/nativeblocks/cli/cmd/integrationModule"
 )
 
 type Schema struct {
-	Schema      string      `json:"$schema"`
-	Type        string      `json:"type"`
-	Required    interface{} `json:"required"`
-	Properties  interface{} `json:"properties"`
-	Definitions interface{} `json:"definitions"`
+	Schema        string      `json:"$schema"`
+	SchemaVersion string      `json:"schema-version"`
+	Type          string      `json:"type"`
+	Required      interface{} `json:"required"`
+	Properties    interface{} `json:"properties"`
+	Definitions   interface{} `json:"definitions"`
 }
 
 type Block struct {
@@ -41,11 +41,12 @@ type Trigger struct {
 	Triggers           []Trigger        `json:"triggers"`
 }
 
-func generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockData, blockSlots, blockEvents, actionProperties, actionData []string) (Schema, error) {
+func generateBaseSchema(version string, blockKeyTypes, actionKeyTypes, blockProperties, blockData, blockSlots, blockEvents, actionProperties, actionData []string) (Schema, error) {
 	baseSchema := Schema{
-		Schema:   "http://json-schema.org/draft-07/schema#",
-		Type:     "object",
-		Required: []string{"name", "route", "isStarter", "type", "variables", "blocks"},
+		Schema:        "http://json-schema.org/draft-07/schema#",
+		SchemaVersion: version,
+		Type:          "object",
+		Required:      []string{"name", "route", "isStarter", "type", "variables", "blocks"},
 		Properties: map[string]interface{}{
 			"name": map[string]string{
 				"type": "string",
