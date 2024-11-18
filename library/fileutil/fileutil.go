@@ -49,6 +49,14 @@ func (fm *FileManager) SaveToFile(filename string, data interface{}) error {
 	return nil
 }
 
+func (fm *FileManager) SaveByteToFile(filename string, data []byte) error {
+	filePath := filepath.Join(fm.BaseDir, filename)
+	if err := os.WriteFile(filePath, data, 0644); err != nil {
+		return fmt.Errorf("failed to write file: %v", err)
+	}
+	return nil
+}
+
 func (fm *FileManager) LoadFromFile(filename string, target interface{}) error {
 	filePath := filepath.Join(fm.BaseDir, filename)
 	data, err := os.ReadFile(filePath)
