@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/nativeblocks/cli/cmd/authModule"
+	"github.com/nativeblocks/cli/cmd/codeGenModule"
 	"github.com/nativeblocks/cli/cmd/frameModule"
 	"github.com/nativeblocks/cli/cmd/integrationModule"
 	"github.com/nativeblocks/cli/cmd/organizationModule"
@@ -25,6 +26,7 @@ func main() {
 		projectModule.ProjectCmd(),
 		frameModule.FrameCmd(),
 		integrationModule.IntegrationCmd(),
+		codeGenModule.CodeGenCmd(),
 	)
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)

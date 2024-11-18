@@ -5,6 +5,7 @@ go 1.23.2
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
