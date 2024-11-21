@@ -47,6 +47,10 @@ func processTriggers(actionId string, triggers []ActionTriggerDSLModel, parentId
 			Data:               []TriggerDataModel{},
 		}
 
+		if newTrigger.Then == "END" && len(trigger.Triggers) > 0 {
+			return nil, errors.New("The " + newTrigger.Name + " can not have a subTrigger because it defines with \"END\" then ")
+		}
+
 		for _, property := range trigger.Properties {
 			newProperty := TriggerPropertyModel{
 				Id:                 generateId(),
@@ -76,7 +80,7 @@ func processTriggers(actionId string, triggers []ActionTriggerDSLModel, parentId
 			newTrigger.Data = append(newTrigger.Data, newData)
 		}
 
-		err := findTriggerVariable(variables, newTrigger.Data)
+		err := findTriggerVariable(variables, newTrigger.Data, newTrigger.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -99,7 +103,7 @@ func processTriggers(actionId string, triggers []ActionTriggerDSLModel, parentId
 	return flatTriggers, nil
 }
 
-func processBlocks(frameId string, blocks []BlockDSLModel, parentId string, parentSlots []BlockSlotModel, variables []VariableModel, onNewAction func([]ActionModel, error)) ([]BlockModel, error) {
+func processBlocks(frameId string, blocks []BlockDSLModel, parentId string, parentSlots []BlockSlotModel, variables []VariableModel, onNewAction func([]ActionModel)) ([]BlockModel, error) {
 	var flatBlocks []BlockModel
 
 	for index, block := range blocks {
@@ -130,7 +134,11 @@ func processBlocks(frameId string, blocks []BlockDSLModel, parentId string, pare
 			}
 		}
 
-		onNewAction(processActions(frameId, block.Key, block.Actions, variables))
+		processedActions, err := processActions(frameId, block.Key, block.Actions, variables)
+		if err != nil {
+			return nil, err
+		}
+		onNewAction(processedActions)
 
 		for _, property := range block.Properties {
 			newProperty := BlockPropertyModel{
@@ -174,7 +182,7 @@ func processBlocks(frameId string, blocks []BlockDSLModel, parentId string, pare
 			newBlock.Slots = append(newBlock.Slots, newSlot)
 		}
 
-		err := findBlockVariable(variables, newBlock.Data)
+		err = findBlockVariable(variables, newBlock.Data, newBlock.Key)
 		if err != nil {
 			return nil, err
 		}
@@ -255,9 +263,13 @@ func generateFrame(frameDSL FrameDSLModel) (FrameProductionDataWrapper, error) {
 		return FrameProductionDataWrapper{}, errors.New("first block's keyType must be 'ROOT'")
 	}
 
-	blocks, err := processBlocks(frameId, frameDSL.Blocks, "", []BlockSlotModel{}, variables, func(blockActions []ActionModel, err error) {
+	blocks, err := processBlocks(frameId, frameDSL.Blocks, "", []BlockSlotModel{}, variables, func(blockActions []ActionModel) {
 		actions = append(actions, blockActions...)
 	})
+
+	if err != nil {
+		return FrameProductionDataWrapper{}, err
+	}
 
 	frame := FrameModel{
 		Id:             frameId,
@@ -286,7 +298,7 @@ func generateFrame(frameDSL FrameDSLModel) (FrameProductionDataWrapper, error) {
 	return wrapper, err
 }
 
-func findBlockVariable(variables []VariableModel, data []BlockDataModel) error {
+func findBlockVariable(variables []VariableModel, data []BlockDataModel, blockKey string) error {
 	for _, dataEntry := range data {
 		found := false
 		for _, variable := range variables {
@@ -296,13 +308,13 @@ func findBlockVariable(variables []VariableModel, data []BlockDataModel) error {
 			}
 		}
 		if !found {
-			return fmt.Errorf("no matching variable found for data entry with value: %s", dataEntry.Value)
+			return fmt.Errorf("no matching variable found for %s block in data entry with key: %s", blockKey, dataEntry.Key)
 		}
 	}
 	return nil
 }
 
-func findTriggerVariable(variables []VariableModel, data []TriggerDataModel) error {
+func findTriggerVariable(variables []VariableModel, data []TriggerDataModel, triggerName string) error {
 	for _, dataEntry := range data {
 		found := false
 		for _, variable := range variables {
@@ -312,7 +324,7 @@ func findTriggerVariable(variables []VariableModel, data []TriggerDataModel) err
 			}
 		}
 		if !found {
-			return fmt.Errorf("no matching variable found for data entry with value: %s", dataEntry.Value)
+			return fmt.Errorf("no matching variable found for %s trigger in data entry with key: %s", triggerName, dataEntry.Key)
 		}
 	}
 	return nil
