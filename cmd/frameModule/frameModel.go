@@ -37,18 +37,20 @@ type VariableModel struct {
 }
 
 type BlockModel struct {
-	Id                 string               `json:"id"`
-	FrameId            string               `json:"frameId"`
-	KeyType            string               `json:"keyType"`
-	Key                string               `json:"key"`
-	VisibilityKey      string               `json:"visibilityKey"`
-	Position           int                  `json:"position"`
-	Slot               string               `json:"slot"`
-	IntegrationVersion int                  `json:"integrationVersion"`
-	ParentId           string               `json:"parentId"`
-	Data               []BlockDataModel     `json:"data"`
-	Properties         []BlockPropertyModel `json:"properties"`
-	Slots              []BlockSlotModel     `json:"slots"`
+	Id                          string               `json:"id"`
+	FrameId                     string               `json:"frameId"`
+	KeyType                     string               `json:"keyType"`
+	Key                         string               `json:"key"`
+	VisibilityKey               string               `json:"visibilityKey"`
+	Position                    int                  `json:"position"`
+	Slot                        string               `json:"slot"`
+	IntegrationVersion          int                  `json:"integrationVersion"`
+	ParentId                    string               `json:"parentId"`
+	Data                        []BlockDataModel     `json:"data"`
+	Properties                  []BlockPropertyModel `json:"properties"`
+	Slots                       []BlockSlotModel     `json:"slots"`
+	IntegrationDeprecated       bool                 `json:"integrationDeprecated"`
+	IntegrationDeprecatedReason string               `json:"integrationDeprecatedReason"`
 }
 
 type BlockPropertyModel struct {
@@ -63,22 +65,28 @@ type BlockPropertyModel struct {
 	ValuePicker        string `json:"valuePicker"`
 	ValuePickerGroup   string `json:"valuePickerGroup"`
 	ValuePickerOptions string `json:"valuePickerOptions"`
+	Deprecated         bool   `json:"deprecated"`
+	DeprecatedReason   string `json:"deprecatedReason"`
 }
 
 type BlockDataModel struct {
-	Id          string `json:"id"`
-	BlockId     string `json:"blockId"`
-	Key         string `json:"key"`
-	Value       string `json:"value"`
-	Type        string `json:"type"`
-	Description string `json:"description"`
+	Id               string `json:"id"`
+	BlockId          string `json:"blockId"`
+	Key              string `json:"key"`
+	Value            string `json:"value"`
+	Type             string `json:"type"`
+	Description      string `json:"description"`
+	Deprecated       bool   `json:"deprecated"`
+	DeprecatedReason string `json:"deprecatedReason"`
 }
 
 type BlockSlotModel struct {
-	Id          string `json:"id"`
-	BlockId     string `json:"blockId"`
-	Slot        string `json:"slot"`
-	Description string `json:"description"`
+	Id               string `json:"id"`
+	BlockId          string `json:"blockId"`
+	Slot             string `json:"slot"`
+	Description      string `json:"description"`
+	Deprecated       bool   `json:"deprecated"`
+	DeprecatedReason string `json:"deprecatedReason"`
 }
 
 type ActionModel struct {
@@ -90,15 +98,17 @@ type ActionModel struct {
 }
 
 type ActionTriggerModel struct {
-	Id                 string                 `json:"id"`
-	ActionId           string                 `json:"actionId"`
-	ParentId           string                 `json:"parentId"`
-	KeyType            string                 `json:"keyType"`
-	Then               string                 `json:"then"`
-	Name               string                 `json:"name"`
-	IntegrationVersion int                    `json:"integrationVersion"`
-	Properties         []TriggerPropertyModel `json:"properties"`
-	Data               []TriggerDataModel     `json:"data"`
+	Id                          string                 `json:"id"`
+	ActionId                    string                 `json:"actionId"`
+	ParentId                    string                 `json:"parentId"`
+	KeyType                     string                 `json:"keyType"`
+	Then                        string                 `json:"then"`
+	Name                        string                 `json:"name"`
+	IntegrationVersion          int                    `json:"integrationVersion"`
+	Properties                  []TriggerPropertyModel `json:"properties"`
+	Data                        []TriggerDataModel     `json:"data"`
+	IntegrationDeprecated       bool                   `json:"integrationDeprecated"`
+	IntegrationDeprecatedReason string                 `json:"integrationDeprecatedReason"`
 }
 
 type TriggerPropertyModel struct {
@@ -111,13 +121,17 @@ type TriggerPropertyModel struct {
 	ValuePicker        string `json:"valuePicker"`
 	ValuePickerGroup   string `json:"valuePickerGroup"`
 	ValuePickerOptions string `json:"valuePickerOptions"`
+	Deprecated         bool   `json:"deprecated"`
+	DeprecatedReason   string `json:"deprecatedReason"`
 }
 
 type TriggerDataModel struct {
-	Id              string `json:"id"`
-	ActionTriggerId string `json:"actionTriggerId"`
-	Key             string `json:"key"`
-	Value           string `json:"value"`
-	Type            string `json:"type"`
-	Description     string `json:"description"`
+	Id               string `json:"id"`
+	ActionTriggerId  string `json:"actionTriggerId"`
+	Key              string `json:"key"`
+	Value            string `json:"value"`
+	Type             string `json:"type"`
+	Description      string `json:"description"`
+	Deprecated       bool   `json:"deprecated"`
+	DeprecatedReason string `json:"deprecatedReason"`
 }

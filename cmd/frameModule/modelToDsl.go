@@ -169,10 +169,9 @@ func buildBlockTreeWithActions(blocks []BlockModel, actions []ActionModel) []Blo
 
 func mapVariableModelToDSL(variable VariableModel) VariableDSLModel {
 	return VariableDSLModel{
-		FrameId: variable.FrameId,
-		Key:     variable.Key,
-		Value:   variable.Value,
-		Type:    variable.Type,
+		Key:   variable.Key,
+		Value: variable.Value,
+		Type:  variable.Type,
 	}
 }
 
