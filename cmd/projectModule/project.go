@@ -136,8 +136,6 @@ func projectSchemaGenCmd() *cobra.Command {
 			actions := make(map[string]interface{})
 
 			version := time.Now().UTC().Format("2006-01-02 15:04")
-			blocks["schema-version"] = version
-			actions["schema-version"] = version
 
 			if edition == "cloud" || edition == "Cloud" || edition == "CLOUD" {
 				fm, err := fileutil.NewFileManager(nil)
@@ -261,6 +259,9 @@ func projectSchemaGenCmd() *cobra.Command {
 				}
 				blockKeyTypes = append(blockKeyTypes, "ROOT")
 			}
+
+			blocks["schema-version"] = version
+			actions["schema-version"] = version
 
 			schema, err := generateBaseSchema(version, blockKeyTypes, actionKeyTypes, blockProperties, blockData, blockSlots, blockEvents, actionProperties, actionData)
 			if err != nil {
