@@ -68,11 +68,14 @@ nativeblocks project get
 
 #### Generate project schema
 
+Generates project base schema with found blocks and actions, you need to upload them on a public url to use for frame
+and code-gen commands
+
 - -p, --path, Project working path
 - -e, --edition, Edition type (cloud or community)
 
 ```bash
-nativeblocks project gen-schema
+nativeblocks project gen-schema -e cloud -p /Users/sample/projects/awesome_project
 ```
 
 ### Integration
@@ -88,10 +91,12 @@ nativeblocks integration list -p "REACT" -k "ALL"
 
 #### Integration sync
 
+Note: To sync an integration please make sure you pass the .nativeblocks directory
+
 - -p, --path, Integration working path
 
 ```bash
-nativeblocks integration sync
+nativeblocks integration sync -p /Users/sample/projects/awesome_project/integrations/button/.nativeblocks
 ```
 
 #### Integration detail
@@ -100,7 +105,7 @@ nativeblocks integration sync
 - -i, --integrationId, Integration working path
 
 ```bash
-nativeblocks integration -i "2222-2222-2222-2222" -p "/Users/sample/projects/awesome_project/integrations/button"
+nativeblocks integration -i "2222-2222-2222-2222" -p /Users/sample/projects/awesome_project/integrations/button/.nativeblocks
 ```
 
 ### Frame
@@ -120,10 +125,35 @@ nativeblocks frame gen -p "/Users/sample/projects/awesome_project/frame/login"
 ```bash
 nativeblocks frame push -p "/Users/sample/projects/awesome_project/frame/login"
 ```
+
 #### Frame pull
 
 - -p, --path, Frame working path
 
 ```bash
 nativeblocks frame pull -p "/Users/sample/projects/awesome_project/frame/login"
+```
+
+### Frame
+
+#### Codegen typescript
+
+- -a, --actionsSchemaUrl string Actions schema url
+- -b, --blocksSchemaUrl string Blocks schema url
+- -p, --path string Output path
+
+```bash
+nativeblocks code-gen ts -p "/Users/sample/projects/src/integrations" -b https://publich-address.com/registered-blocks.json -a https://publich-address.com/registered-actions.json
+
+```
+
+#### Codegen php
+
+- -a, --actionsSchemaUrl string Actions schema url
+- -b, --blocksSchemaUrl string Blocks schema url
+- -p, --path string Output path
+
+```bash
+nativeblocks code-gen php -p "/Users/sample/projects/src/Integrations" -b https://publich-address.com/registered-blocks.json -a https://publich-address.com/registered-actions.json
+
 ```
