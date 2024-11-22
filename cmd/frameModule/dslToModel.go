@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -271,6 +272,11 @@ func generateFrame(frameDSL FrameDSLModel) (FrameProductionDataWrapper, error) {
 		return FrameProductionDataWrapper{}, err
 	}
 
+	hasDuplicateBlockKey := findDuplicateKeys(blocks)
+	if len(hasDuplicateBlockKey) > 0 {
+		return FrameProductionDataWrapper{}, errors.New("duplicate block keys found: " + strings.Join(hasDuplicateBlockKey, ","))
+	}
+
 	frame := FrameModel{
 		Id:             frameId,
 		Name:           frameDSL.Name,
@@ -337,4 +343,20 @@ func containsSlot(slots []BlockSlotModel, key string) bool {
 		}
 	}
 	return false
+}
+
+func findDuplicateKeys(blocks []BlockModel) []string {
+	keyCount := make(map[string]int)
+	var duplicates []string
+
+	for _, block := range blocks {
+		keyCount[block.Key]++
+	}
+
+	for key, count := range keyCount {
+		if count > 1 {
+			duplicates = append(duplicates, key)
+		}
+	}
+	return duplicates
 }
