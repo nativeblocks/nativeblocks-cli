@@ -22,6 +22,11 @@ const authLoginMutation = `
   }
 `
 
+const (
+	ProjectFileName      = "project"
+	OrganizationFileName = "organization"
+)
+
 func Authenticate(fm fileutil.FileManager, regionUrl, username, password string) (*AuthModel, error) {
 	client := graphqlutil.NewClient()
 
@@ -55,6 +60,9 @@ func Authenticate(fm fileutil.FileManager, regionUrl, username, password string)
 		Email:       authResponse.AuthLogin.Email,
 	}
 
+	_ = fm.DeleteFile(OrganizationFileName)
+	_ = fm.DeleteFile(ProjectFileName)
+
 	if err := fm.SaveToFile(authCacheFileName, authConfig); err != nil {
 		return nil, errors.New("failed to save auth config: " + err.Error())
 	}
@@ -87,6 +95,9 @@ func AuthenticateWithToken(fm fileutil.FileManager, accessToken string) (*AuthMo
 		AccessToken: accessToken,
 		Email:       eml,
 	}
+
+	_ = fm.DeleteFile(OrganizationFileName)
+	_ = fm.DeleteFile(ProjectFileName)
 
 	if err := fm.SaveToFile(authCacheFileName, authConfig); err != nil {
 		return nil, errors.New("failed to save auth config: " + err.Error())
