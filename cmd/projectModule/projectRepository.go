@@ -1,4 +1,4 @@
-package project
+package projectModule
 
 import (
 	"errors"
@@ -50,7 +50,7 @@ const installedIntegrationsQuery = `
 	}
 `
 
-func GetProjects(fm fileutil.FileManager, regionUrl string, accessToken string, organizationId string) ([]ProjectModel, error) {
+func GetProjects(regionUrl string, accessToken string, organizationId string) ([]ProjectModel, error) {
 	client := graphqlutil.NewClient()
 
 	headers := map[string]string{
@@ -97,7 +97,7 @@ func GetProject(fm fileutil.FileManager) (*ProjectModel, error) {
 	return &model, nil
 }
 
-func GetInstalledIntegration(regionUrl string, accessToken string, organizationId string, projectId string, kind string) ([]IntegrationModel, error) {
+func GetInstalledIntegration(regionUrl string, accessToken string, organizationId string, projectId string, kind string) ([]IntegrationProjectModel, error) {
 
 	client := graphqlutil.NewClient()
 
@@ -127,8 +127,5 @@ func GetInstalledIntegration(regionUrl string, accessToken string, organizationI
 		return nil, err
 	}
 
-	if len(installedIntegrationResponse.IntegrationsInstalled) == 0 {
-		return nil, errors.New("no integrations found")
-	}
 	return mapIntegrationsResponseToModel(installedIntegrationResponse), nil
 }

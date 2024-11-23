@@ -1,4 +1,4 @@
-package project
+package projectModule
 
 type ProjectModel struct {
 	Id       string        `json:"id"`
@@ -35,7 +35,7 @@ type IntegrationSlotModel struct {
 	Slot string `json:"slot"`
 }
 
-type IntegrationModel struct {
+type IntegrationProjectModel struct {
 	IntegrationKeyType         string                     `json:"integrationKeyType"`
 	IntegrationVersion         int8                       `json:"integrationVersion"`
 	IntegrationID              string                     `json:"integrationId"`
@@ -48,7 +48,7 @@ type IntegrationModel struct {
 }
 
 type InstalledIntegrationResponse struct {
-	IntegrationsInstalled []IntegrationModel `json:"integrationsInstalled"`
+	IntegrationsInstalled []IntegrationProjectModel `json:"integrationsInstalled"`
 }
 
 func mapProjectsResponseToModel(response ProjectsResponse) []ProjectModel {
@@ -73,8 +73,8 @@ func mapProjectsResponseToModel(response ProjectsResponse) []ProjectModel {
 	return projectModels
 }
 
-func mapIntegrationsResponseToModel(response InstalledIntegrationResponse) []IntegrationModel {
-	var integrationModels []IntegrationModel
+func mapIntegrationsResponseToModel(response InstalledIntegrationResponse) []IntegrationProjectModel {
+	var integrationModels []IntegrationProjectModel
 	for _, integration := range response.IntegrationsInstalled {
 		var properties []IntegrationPropertyModel
 		for _, prop := range integration.IntegrationProperties {
@@ -107,7 +107,7 @@ func mapIntegrationsResponseToModel(response InstalledIntegrationResponse) []Int
 			})
 		}
 
-		integrationModel := IntegrationModel{
+		integrationModel := IntegrationProjectModel{
 			IntegrationKeyType:         integration.IntegrationKeyType,
 			IntegrationVersion:         integration.IntegrationVersion,
 			IntegrationID:              integration.IntegrationID,

@@ -1,4 +1,4 @@
-package frame
+package frameModule
 
 import (
 	"github.com/google/uuid"
@@ -19,10 +19,9 @@ type FrameDSLModel struct {
 }
 
 type VariableDSLModel struct {
-	FrameId string `json:"frameId"`
-	Key     string `json:"key"`
-	Value   string `json:"value"`
-	Type    string `json:"type"`
+	Key   string `json:"key"`
+	Value string `json:"value"`
+	Type  string `json:"type"`
 }
 
 type BlockDSLModel struct {

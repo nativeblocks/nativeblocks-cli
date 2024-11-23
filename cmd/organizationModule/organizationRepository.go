@@ -1,4 +1,4 @@
-package organization
+package organizationModule
 
 import (
 	"errors"
@@ -18,7 +18,7 @@ const organizationsQuery = `
   }
 `
 
-func GetOrganizations(fm fileutil.FileManager, regionUrl, accessToken string) ([]OrganizationModel, error) {
+func GetOrganizations(regionUrl, accessToken string) ([]OrganizationModel, error) {
 	client := graphqlutil.NewClient()
 
 	headers := map[string]string{

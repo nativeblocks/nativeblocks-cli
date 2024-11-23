@@ -1,4 +1,4 @@
-package frame
+package frameModule
 
 import (
 	"encoding/json"
@@ -82,7 +82,7 @@ const getFrameQuery = `
 func pushFrame(output FrameProductionDataWrapper, regionUrl string, accessToken string, apiKey string) error {
 
 	if output.Data.FrameProduction.Id == "" {
-		return errors.New("could not genereate frame, please check your input")
+		return errors.New("could not generate frame, please check your input")
 	}
 
 	client := graphqlutil.NewClient()

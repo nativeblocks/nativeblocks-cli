@@ -3,12 +3,13 @@ package main
 import (
 	"os"
 
-	"github.com/nativeblocks/cli/cmd/auth"
-	"github.com/nativeblocks/cli/cmd/frame"
-	"github.com/nativeblocks/cli/cmd/integration"
-	"github.com/nativeblocks/cli/cmd/organization"
-	"github.com/nativeblocks/cli/cmd/project"
-	"github.com/nativeblocks/cli/cmd/region"
+	"github.com/nativeblocks/cli/cmd/authModule"
+	"github.com/nativeblocks/cli/cmd/codeGenModule"
+	"github.com/nativeblocks/cli/cmd/frameModule"
+	"github.com/nativeblocks/cli/cmd/integrationModule"
+	"github.com/nativeblocks/cli/cmd/organizationModule"
+	"github.com/nativeblocks/cli/cmd/projectModule"
+	"github.com/nativeblocks/cli/cmd/regionModule"
 	"github.com/spf13/cobra"
 )
 
@@ -19,12 +20,13 @@ func main() {
 	}
 
 	rootCmd.AddCommand(
-		region.RegionCmd(),
-		auth.AuthCmd(),
-		organization.OrganizationCmd(),
-		project.ProjectCmd(),
-		frame.FrameCmd(),
-		integration.IntegrationCmd(),
+		regionModule.RegionCmd(),
+		authModule.AuthCmd(),
+		organizationModule.OrganizationCmd(),
+		projectModule.ProjectCmd(),
+		frameModule.FrameCmd(),
+		integrationModule.IntegrationCmd(),
+		codeGenModule.CodeGenCmd(),
 	)
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)

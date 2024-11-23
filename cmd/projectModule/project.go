@@ -1,13 +1,14 @@
-package project
+package projectModule
 
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/nativeblocks/cli/cmd/auth"
-	"github.com/nativeblocks/cli/cmd/organization"
-	"github.com/nativeblocks/cli/cmd/region"
+	"github.com/nativeblocks/cli/cmd/authModule"
+	"github.com/nativeblocks/cli/cmd/organizationModule"
+	"github.com/nativeblocks/cli/cmd/regionModule"
 	"github.com/nativeblocks/cli/library/fileutil"
 	"github.com/spf13/cobra"
 )
@@ -34,22 +35,22 @@ func projectSetCmd() *cobra.Command {
 				return err
 			}
 
-			region, err := region.GetRegion(*fm)
+			region, err := regionModule.GetRegion(*fm)
 			if err != nil {
 				return err
 			}
 
-			auth, err := auth.AuthGet(*fm)
+			auth, err := authModule.AuthGet(*fm)
 			if err != nil {
 				return err
 			}
 
-			organization, err := organization.GetOrganization(*fm)
+			organization, err := organizationModule.GetOrganization(*fm)
 			if err != nil {
 				return err
 			}
 
-			projects, err := GetProjects(*fm, region.Url, auth.AccessToken, organization.Id)
+			projects, err := GetProjects(region.Url, auth.AccessToken, organization.Id)
 			if err != nil {
 				return err
 			}
@@ -74,7 +75,10 @@ func projectSetCmd() *cobra.Command {
 			}
 
 			selectedProj := optionMap[selection]
-			SelectProject(*fm, &selectedProj)
+			err = SelectProject(*fm, &selectedProj)
+			if err != nil {
+				return err
+			}
 
 			fmt.Printf("Selected project: %s (%s)\n", selectedProj.Name, selectedProj.Id)
 			if selectedProj.Id != "" {
@@ -121,27 +125,34 @@ func projectSchemaGenCmd() *cobra.Command {
 			blockKeyTypes := make([]string, 0)
 			blockProperties := make([]string, 0)
 			blockData := make([]string, 0)
+			blockSlots := make([]string, 0)
+			blockEvents := make([]string, 0)
 
 			actionKeyTypes := make([]string, 0)
 			actionProperties := make([]string, 0)
 			actionData := make([]string, 0)
+
+			blocks := make(map[string]interface{})
+			actions := make(map[string]interface{})
+
+			version := time.Now().UTC().Format("2006-01-02 15:04")
 
 			if edition == "cloud" || edition == "Cloud" || edition == "CLOUD" {
 				fm, err := fileutil.NewFileManager(nil)
 				if err != nil {
 					return err
 				}
-				region, err := region.GetRegion(*fm)
+				region, err := regionModule.GetRegion(*fm)
 				if err != nil {
 					return err
 				}
 
-				auth, err := auth.AuthGet(*fm)
+				auth, err := authModule.AuthGet(*fm)
 				if err != nil {
 					return err
 				}
 
-				organization, err := organization.GetOrganization(*fm)
+				organization, err := organizationModule.GetOrganization(*fm)
 				if err != nil {
 					return err
 				}
@@ -159,13 +170,40 @@ func projectSchemaGenCmd() *cobra.Command {
 				for _, installedIntegration := range installedBlocks {
 					blockKeyTypes = append(blockKeyTypes, installedIntegration.IntegrationKeyType)
 					for _, property := range installedIntegration.IntegrationProperties {
-						meta := MetaItem(property)
-						blockProperties = append(blockProperties, meta.Key)
+						blockProperties = append(blockProperties, property.Key)
 					}
 					for _, dataItem := range installedIntegration.IntegrationData {
-						meta := MetaItem{Key: dataItem.Key, Value: "", Type: dataItem.Type}
-						blockData = append(blockData, meta.Key)
+						blockData = append(blockData, dataItem.Key)
 					}
+					for _, slot := range installedIntegration.IntegrationSlots {
+						blockSlots = append(blockSlots, slot.Slot)
+					}
+					for _, event := range installedIntegration.IntegrationEvents {
+						blockEvents = append(blockEvents, event.Event)
+					}
+					block := map[string]interface{}{
+						"keyType":    installedIntegration.IntegrationKeyType,
+						"version":    installedIntegration.IntegrationVersion,
+						"data":       installedIntegration.IntegrationData,
+						"properties": installedIntegration.IntegrationProperties,
+						"slots":      installedIntegration.IntegrationSlots,
+						"events":     installedIntegration.IntegrationEvents,
+					}
+
+					if installedIntegration.IntegrationData == nil {
+						block["data"] = []interface{}{}
+					}
+					if installedIntegration.IntegrationProperties == nil {
+						block["properties"] = []interface{}{}
+					}
+					if installedIntegration.IntegrationSlots == nil {
+						block["slots"] = []interface{}{}
+					}
+					if installedIntegration.IntegrationEvents == nil {
+						block["events"] = []interface{}{}
+					}
+
+					blocks[installedIntegration.IntegrationKeyType] = block
 				}
 
 				installedActions, err := GetInstalledIntegration(region.Url, auth.AccessToken, organization.Id, project.Id, "ACTION")
@@ -176,13 +214,30 @@ func projectSchemaGenCmd() *cobra.Command {
 				for _, installedIntegration := range installedActions {
 					actionKeyTypes = append(actionKeyTypes, installedIntegration.IntegrationKeyType)
 					for _, property := range installedIntegration.IntegrationProperties {
-						meta := MetaItem(property)
-						actionProperties = append(actionProperties, meta.Key)
+						actionProperties = append(actionProperties, property.Key)
 					}
 					for _, dataItem := range installedIntegration.IntegrationData {
-						meta := MetaItem{Key: dataItem.Key, Value: "", Type: dataItem.Type}
-						actionData = append(actionData, meta.Key)
+						actionData = append(actionData, dataItem.Key)
 					}
+					action := map[string]interface{}{
+						"keyType":    installedIntegration.IntegrationKeyType,
+						"version":    installedIntegration.IntegrationVersion,
+						"data":       installedIntegration.IntegrationData,
+						"properties": installedIntegration.IntegrationProperties,
+						"events":     installedIntegration.IntegrationEvents,
+					}
+
+					if installedIntegration.IntegrationData == nil {
+						action["data"] = []interface{}{}
+					}
+					if installedIntegration.IntegrationProperties == nil {
+						action["properties"] = []interface{}{}
+					}
+					if installedIntegration.IntegrationEvents == nil {
+						action["events"] = []interface{}{}
+					}
+
+					actions[installedIntegration.IntegrationKeyType] = action
 				}
 			} else {
 				blockExist := inputFm.FileExists("integrations/block")
@@ -190,17 +245,25 @@ func projectSchemaGenCmd() *cobra.Command {
 					blockKeyTypes = findKeyTypes(inputFm.BaseDir + "/integrations/block")
 					blockProperties = findProperties(inputFm.BaseDir + "/integrations/block")
 					blockData = findData(inputFm.BaseDir + "/integrations/block")
+					blockSlots = findSlots(inputFm.BaseDir + "/integrations/block")
+					blockEvents = findEvents(inputFm.BaseDir + "/integrations/block")
+
+					blocks = findIntegrations(inputFm.BaseDir + "/integrations/block")
 				}
 				actionExist := inputFm.FileExists("integrations/action")
 				if actionExist {
 					actionKeyTypes = findKeyTypes(inputFm.BaseDir + "/integrations/action")
 					actionProperties = findProperties(inputFm.BaseDir + "/integrations/action")
 					actionData = findData(inputFm.BaseDir + "/integrations/action")
+					actions = findIntegrations(inputFm.BaseDir + "/integrations/action")
 				}
 				blockKeyTypes = append(blockKeyTypes, "ROOT")
 			}
 
-			schema, err := generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockData, actionProperties, actionData)
+			blocks["schema-version"] = version
+			actions["schema-version"] = version
+
+			schema, err := generateBaseSchema(version, blockKeyTypes, actionKeyTypes, blockProperties, blockData, blockSlots, blockEvents, actionProperties, actionData)
 			if err != nil {
 				return nil
 			}
@@ -208,13 +271,21 @@ func projectSchemaGenCmd() *cobra.Command {
 			if err := inputFm.SaveToFile("schema.json", schema); err != nil {
 				return err
 			}
+
+			if err := inputFm.SaveToFile("blocks.json", blocks); err != nil {
+				return err
+			}
+			if err := inputFm.SaveToFile("actions.json", actions); err != nil {
+				return err
+			}
+
 			fmt.Printf("Schema file generated successfully at %s \n", inputFm.BaseDir)
 			return nil
 		},
 	}
 	cmd.Flags().StringVarP(&edition, "edition", "e", "", "Edition type (cloud or community)")
 	cmd.Flags().StringVarP(&path, "path", "p", "", "Output path")
-	cmd.MarkFlagRequired("edition")
-	cmd.MarkFlagRequired("path")
+	_ = cmd.MarkFlagRequired("edition")
+	_ = cmd.MarkFlagRequired("path")
 	return cmd
 }

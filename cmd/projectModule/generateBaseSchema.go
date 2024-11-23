@@ -1,19 +1,21 @@
-package project
+package projectModule
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/nativeblocks/cli/cmd/integrationModule"
 	"io/fs"
 	"os"
 	"path/filepath"
 )
 
 type Schema struct {
-	Schema      string      `json:"$schema"`
-	Type        string      `json:"type"`
-	Required    interface{} `json:"required"`
-	Properties  interface{} `json:"properties"`
-	Definitions interface{} `json:"definitions"`
+	Schema        string      `json:"$schema"`
+	SchemaVersion string      `json:"schema-version"`
+	Type          string      `json:"type"`
+	Required      interface{} `json:"required"`
+	Properties    interface{} `json:"properties"`
+	Definitions   interface{} `json:"definitions"`
 }
 
 type Block struct {
@@ -39,11 +41,12 @@ type Trigger struct {
 	Triggers           []Trigger        `json:"triggers"`
 }
 
-func generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockData, actionProperties, actionData []string) (Schema, error) {
+func generateBaseSchema(version string, blockKeyTypes, actionKeyTypes, blockProperties, blockData, blockSlots, blockEvents, actionProperties, actionData []string) (Schema, error) {
 	baseSchema := Schema{
-		Schema:   "http://json-schema.org/draft-07/schema#",
-		Type:     "object",
-		Required: []string{"name", "route", "isStarter", "type", "variables", "blocks"},
+		Schema:        "http://json-schema.org/draft-07/schema#",
+		SchemaVersion: version,
+		Type:          "object",
+		Required:      []string{"name", "route", "isStarter", "type", "variables", "blocks"},
 		Properties: map[string]interface{}{
 			"name": map[string]string{
 				"type": "string",
@@ -112,8 +115,9 @@ func generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockDat
 						"items": map[string]interface{}{
 							"type": "object",
 							"properties": map[string]interface{}{
-								"slot": map[string]string{
+								"slot": map[string]interface{}{
 									"type": "string",
+									"enum": getUniqueKeys(blockSlots),
 								},
 							},
 						},
@@ -173,8 +177,9 @@ func generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockDat
 							"type":     "object",
 							"required": []string{"event", "triggers"},
 							"properties": map[string]interface{}{
-								"event": map[string]string{
+								"event": map[string]interface{}{
 									"type": "string",
+									"enum": getUniqueKeys(blockEvents),
 								},
 								"triggers": map[string]interface{}{
 									"type": "array",
@@ -267,7 +272,7 @@ func generateBaseSchema(blockKeyTypes, actionKeyTypes, blockProperties, blockDat
 
 func getUniqueKeys[T comparable](sliceList []T) []T {
 	allKeys := make(map[T]bool)
-	list := []T{}
+	var list = make([]T, 0)
 	for _, item := range sliceList {
 		if _, value := allKeys[item]; !value {
 			allKeys[item] = true
@@ -277,14 +282,8 @@ func getUniqueKeys[T comparable](sliceList []T) []T {
 	return list
 }
 
-type MetaItem struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-	Type  string `json:"type"`
-}
-
 func findKeyTypes(dirPath string) []string {
-	var keyTypes []string
+	var keyTypes = make([]string, 0)
 	walkFunc := func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -324,7 +323,7 @@ func findKeyTypes(dirPath string) []string {
 }
 
 func findData(dirPath string) []string {
-	var data []string
+	var data = make([]string, 0)
 	walkFunc := func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -347,7 +346,6 @@ func findData(dirPath string) []string {
 
 			for _, item := range jsonData {
 				key, _ := item["key"].(string)
-				// dataType, _ := item[`type`].(string)
 				data = append(data, key)
 			}
 		}
@@ -365,7 +363,7 @@ func findData(dirPath string) []string {
 }
 
 func findProperties(dirPath string) []string {
-	var properties []string
+	var properties = make([]string, 0)
 	walkFunc := func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -388,8 +386,6 @@ func findProperties(dirPath string) []string {
 
 			for _, item := range jsonData {
 				key, _ := item["key"].(string)
-				// value, _ := item["value"].(string)
-				// dataType, _ := item["type"].(string)
 				properties = append(properties, key)
 			}
 		}
@@ -404,4 +400,211 @@ func findProperties(dirPath string) []string {
 	}
 
 	return properties
+}
+
+func findSlots(dirPath string) []string {
+	var slots = make([]string, 0)
+	walkFunc := func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		if info.Name() == "slots.json" {
+			fileContent, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var jsonData []map[string]interface{}
+			if err := json.Unmarshal(fileContent, &jsonData); err != nil {
+				return fmt.Errorf("error parsing %s: %w", path, err)
+			}
+
+			for _, item := range jsonData {
+				key, _ := item["slot"].(string)
+				slots = append(slots, key)
+			}
+		}
+
+		return nil
+	}
+
+	err := filepath.Walk(dirPath, walkFunc)
+	if err != nil {
+		fmt.Printf("Error walking path: %v\n", err)
+		return nil
+	}
+
+	return slots
+}
+
+func findEvents(dirPath string) []string {
+	var events = make([]string, 0)
+	walkFunc := func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		if info.Name() == "events.json" {
+			fileContent, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var jsonData []map[string]interface{}
+			if err := json.Unmarshal(fileContent, &jsonData); err != nil {
+				return fmt.Errorf("error parsing %s: %w", path, err)
+			}
+
+			for _, item := range jsonData {
+				key, _ := item["event"].(string)
+				events = append(events, key)
+			}
+		}
+
+		return nil
+	}
+
+	err := filepath.Walk(dirPath, walkFunc)
+	if err != nil {
+		fmt.Printf("Error walking path: %v\n", err)
+		return nil
+	}
+
+	return events
+}
+
+func findIntegrations(dirPath string) map[string]interface{} {
+	result := make(map[string]interface{})
+
+	var integrationItem integrationModule.IntegrationModel
+	var properties = make([]IntegrationPropertyModel, 0)
+	var data = make([]IntegrationDataModel, 0)
+	var slots = make([]IntegrationSlotModel, 0)
+	var events = make([]IntegrationEventModel, 0)
+	walkFunc := func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		if info.Name() == "integration.json" {
+			fileContent, err := os.ReadFile(path)
+
+			if err != nil {
+				return err
+			}
+
+			var jsonData integrationModule.IntegrationModel
+			if err := json.Unmarshal(fileContent, &jsonData); err != nil {
+				return fmt.Errorf("error parsing %s: %w", path, err)
+			}
+			integrationItem = jsonData
+		}
+
+		if info.Name() == "properties.json" {
+			fileContent, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var jsonData []IntegrationPropertyModel
+			if err := json.Unmarshal(fileContent, &jsonData); err != nil {
+				return fmt.Errorf("error parsing %s: %w", path, err)
+			}
+			if jsonData != nil {
+				properties = jsonData
+			}
+		}
+
+		if info.Name() == "data.json" {
+			fileContent, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var jsonData []IntegrationDataModel
+			if err := json.Unmarshal(fileContent, &jsonData); err != nil {
+				return fmt.Errorf("error parsing %s: %w", path, err)
+			}
+			if jsonData != nil {
+				data = jsonData
+			}
+		}
+
+		if info.Name() == "slots.json" {
+			fileContent, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var jsonData []IntegrationSlotModel
+			if err := json.Unmarshal(fileContent, &jsonData); err != nil {
+				return fmt.Errorf("error parsing %s: %w", path, err)
+			}
+			if jsonData != nil {
+				slots = jsonData
+			}
+
+		}
+
+		if info.Name() == "events.json" {
+			fileContent, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var jsonData []IntegrationEventModel
+			if err := json.Unmarshal(fileContent, &jsonData); err != nil {
+				return fmt.Errorf("error parsing %s: %w", path, err)
+			}
+			if jsonData != nil {
+				events = jsonData
+			}
+		}
+
+		if integrationItem.Kind == "BLOCK" {
+			if integrationItem.KeyType != "" {
+				result[integrationItem.KeyType] = map[string]interface{}{
+					"keyType":    integrationItem.KeyType,
+					"version":    integrationItem.Version,
+					"properties": properties,
+					"data":       data,
+					"events":     events,
+					"slots":      slots,
+				}
+			}
+		} else {
+			if integrationItem.KeyType != "" {
+				result[integrationItem.KeyType] = map[string]interface{}{
+					"keyType":    integrationItem.KeyType,
+					"version":    integrationItem.Version,
+					"properties": properties,
+					"data":       data,
+					"events":     events,
+				}
+			}
+		}
+
+		return nil
+	}
+
+	err := filepath.Walk(dirPath, walkFunc)
+	if err != nil {
+		fmt.Printf("Error walking path: %v\n", err)
+		return nil
+	}
+
+	return result
 }

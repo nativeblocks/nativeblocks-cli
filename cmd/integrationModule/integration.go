@@ -1,21 +1,15 @@
-package integration
+package integrationModule
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/nativeblocks/cli/cmd/auth"
-	"github.com/nativeblocks/cli/cmd/organization"
-	"github.com/nativeblocks/cli/cmd/region"
+	"github.com/nativeblocks/cli/cmd/authModule"
+	"github.com/nativeblocks/cli/cmd/organizationModule"
+	"github.com/nativeblocks/cli/cmd/regionModule"
 	"github.com/nativeblocks/cli/library/fileutil"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-)
-
-const (
-	OrganizationFileName = "organization"
-	RegionFileName       = "region"
-	AuthFileName         = "auth"
 )
 
 func IntegrationCmd() *cobra.Command {
@@ -42,22 +36,22 @@ func integrationListCmd() *cobra.Command {
 				return err
 			}
 
-			region, err := region.GetRegion(*fm)
+			region, err := regionModule.GetRegion(*fm)
 			if err != nil {
 				return err
 			}
 
-			auth, err := auth.AuthGet(*fm)
+			auth, err := authModule.AuthGet(*fm)
 			if err != nil {
 				return err
 			}
 
-			organization, err := organization.GetOrganization(*fm)
+			organization, err := organizationModule.GetOrganization(*fm)
 			if err != nil {
 				return err
 			}
 
-			integrations, err := GetIntegrations(*fm, region.Url, auth.AccessToken, organization.Id, kind, platform)
+			integrations, err := GetIntegrations(region.Url, auth.AccessToken, organization.Id, kind, platform)
 			if err != nil {
 				return err
 			}
@@ -82,8 +76,8 @@ func integrationListCmd() *cobra.Command {
 	}
 	cmd.Flags().StringVarP(&kind, "kind", "k", "", "Integration kind")
 	cmd.Flags().StringVarP(&platform, "platform", "p", "", "Integration platform")
-	cmd.MarkFlagRequired("kind")
-	cmd.MarkFlagRequired("platform")
+	_ = cmd.MarkFlagRequired("kind")
+	_ = cmd.MarkFlagRequired("platform")
 	return cmd
 }
 
@@ -98,17 +92,17 @@ func integrationSyncCmd() *cobra.Command {
 				return err
 			}
 
-			region, err := region.GetRegion(*fm)
+			region, err := regionModule.GetRegion(*fm)
 			if err != nil {
 				return err
 			}
 
-			auth, err := auth.AuthGet(*fm)
+			auth, err := authModule.AuthGet(*fm)
 			if err != nil {
 				return err
 			}
 
-			organization, err := organization.GetOrganization(*fm)
+			organization, err := organizationModule.GetOrganization(*fm)
 			if err != nil {
 				return err
 			}
@@ -124,7 +118,7 @@ func integrationSyncCmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVarP(&path, "path", "p", "", "Integration working path")
-	cmd.MarkFlagRequired("path")
+	_ = cmd.MarkFlagRequired("path")
 	return cmd
 }
 
@@ -139,17 +133,17 @@ func integrationGetCmd() *cobra.Command {
 				return err
 			}
 
-			region, err := region.GetRegion(*fm)
+			region, err := regionModule.GetRegion(*fm)
 			if err != nil {
 				return err
 			}
 
-			auth, err := auth.AuthGet(*fm)
+			auth, err := authModule.AuthGet(*fm)
 			if err != nil {
 				return err
 			}
 
-			organization, err := organization.GetOrganization(*fm)
+			organization, err := organizationModule.GetOrganization(*fm)
 			if err != nil {
 				return err
 			}
@@ -166,7 +160,7 @@ func integrationGetCmd() *cobra.Command {
 	}
 	cmd.Flags().StringVarP(&id, "integrationId", "i", "", "Integration id")
 	cmd.Flags().StringVarP(&path, "path", "p", "", "Integration working path")
-	cmd.MarkFlagRequired("id")
-	cmd.MarkFlagRequired("path")
+	_ = cmd.MarkFlagRequired("id")
+	_ = cmd.MarkFlagRequired("path")
 	return cmd
 }
