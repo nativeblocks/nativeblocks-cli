@@ -18,6 +18,7 @@ func CodeGenCmd() *cobra.Command {
 
 	cmd.AddCommand(genTypescriptCmd())
 	cmd.AddCommand(genPHPCmd())
+	cmd.AddCommand(genGoCmd())
 
 	return cmd
 }
@@ -68,6 +69,11 @@ func baseCodeGen(path string, integrationSchema string, kind string, language st
 		} else if language == "PHP" {
 			block := generatePHPClass(strcase.ToCamel(name), component, kind)
 			if err := fm.SaveByteToFile(strcase.ToCamel(name)+".php", []byte(block)); err != nil {
+				return err
+			}
+		} else if language == "GO" {
+			block := generateGoStruct(strcase.ToCamel(name), component, kind)
+			if err := fm.SaveByteToFile(strcase.ToCamel(name)+".go", []byte(block)); err != nil {
 				return err
 			}
 		} else {
@@ -123,6 +129,35 @@ func genPHPCmd() *cobra.Command {
 				return err
 			}
 			fmt.Printf("PHP classes generated: %v \n", path)
+			return nil
+		},
+	}
+	cmd.Flags().StringVarP(&path, "path", "p", "", "Output path")
+	cmd.Flags().StringVarP(&blocksSchema, "blocksSchemaUrl", "b", "", "Blocks schema url")
+	cmd.Flags().StringVarP(&actionsSchema, "actionsSchemaUrl", "a", "", "Actions schema url")
+	_ = cmd.MarkFlagRequired("path")
+	_ = cmd.MarkFlagRequired("blocksSchemaUrl")
+	_ = cmd.MarkFlagRequired("actionsSchemaUrl")
+	return cmd
+}
+
+func genGoCmd() *cobra.Command {
+	var path string
+	var blocksSchema string
+	var actionsSchema string
+	cmd := &cobra.Command{
+		Use:   "go",
+		Short: "Generate go",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			err := baseCodeGen(path, blocksSchema, "BLOCK", "GO")
+			if err != nil {
+				return err
+			}
+			err = baseCodeGen(path, actionsSchema, "ACTION", "GO")
+			if err != nil {
+				return err
+			}
+			fmt.Printf("GO structes generated: %v \n", path)
 			return nil
 		},
 	}
