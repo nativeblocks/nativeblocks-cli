@@ -143,7 +143,7 @@ nativeblocks frame pull -p "/Users/sample/projects/awesome_project/frame/login"
 - -p, --path string Output path
 
 ```bash
-nativeblocks code-gen ts -p "/Users/sample/projects/src/integrations" -b https://publich-address.com/registered-blocks.json -a https://publich-address.com/registered-actions.json
+nativeblocks code-gen typescript -p "/Users/sample/projects/src/integrations" -b https://publich-address.com/registered-blocks.json -a https://publich-address.com/registered-actions.json
 
 ```
 

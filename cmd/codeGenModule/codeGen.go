@@ -16,7 +16,7 @@ func CodeGenCmd() *cobra.Command {
 		Short: "Generate blocks and actions codes",
 	}
 
-	cmd.AddCommand(genTSCmd())
+	cmd.AddCommand(genTypescriptCmd())
 	cmd.AddCommand(genPHPCmd())
 
 	return cmd
@@ -61,12 +61,12 @@ func baseCodeGen(path string, integrationSchema string, kind string, language st
 		}
 
 		if language == "TS" {
-			integration := generateTSClass(strcase.ToCamel(name), component, kind)
+			integration := generateTypescriptClass(strcase.ToCamel(name), component, kind)
 			if err := fm.SaveByteToFile(strcase.ToCamel(name)+".ts", []byte(integration)); err != nil {
 				return err
 			}
 		} else if language == "PHP" {
-			block := generatePHPClass(strcase.ToCamel(name), component, "BLOCK")
+			block := generatePHPClass(strcase.ToCamel(name), component, kind)
 			if err := fm.SaveByteToFile(strcase.ToCamel(name)+".php", []byte(block)); err != nil {
 				return err
 			}
@@ -77,13 +77,13 @@ func baseCodeGen(path string, integrationSchema string, kind string, language st
 	return nil
 }
 
-func genTSCmd() *cobra.Command {
+func genTypescriptCmd() *cobra.Command {
 	var path string
 	var blocksSchema string
 	var actionsSchema string
 	cmd := &cobra.Command{
-		Use:   "ts",
-		Short: "Generate TS",
+		Use:   "typescript",
+		Short: "Generate typescript",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := baseCodeGen(path, blocksSchema, "BLOCK", "TS")
 			if err != nil {
@@ -93,7 +93,7 @@ func genTSCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("TS classes generated: %v \n", path)
+			fmt.Printf("Typescript classes generated: %v \n", path)
 			return nil
 		},
 	}
@@ -112,7 +112,7 @@ func genPHPCmd() *cobra.Command {
 	var actionsSchema string
 	cmd := &cobra.Command{
 		Use:   "php",
-		Short: "Generate PHP",
+		Short: "Generate php",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := baseCodeGen(path, blocksSchema, "BLOCK", "PHP")
 			if err != nil {
