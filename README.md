@@ -166,3 +166,14 @@ nativeblocks code-gen typescript -p "/Users/sample/projects/src/integrations" -b
 nativeblocks code-gen php -p "/Users/sample/projects/src/Integrations" -b https://publich-address.com/registered-blocks.json -a https://publich-address.com/registered-actions.json
 
 ```
+
+#### Codegen go
+
+- -a, --actionsSchemaUrl string Actions schema url
+- -b, --blocksSchemaUrl string Blocks schema url
+- -p, --path string Output path
+
+```bash
+nativeblocks code-gen go -p "/Users/sample/projects/integration" -b https://publich-address.com/registered-blocks.json -a https://publich-address.com/registered-actions.json
+
+```
