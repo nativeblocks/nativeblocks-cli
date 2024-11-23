@@ -34,8 +34,17 @@ nativeblocks region get
 - -p, --password, password
 
 ```bash
-nativeblocks auth --username "foo@example.com" --password "foobar1234"
-nativeblocks auth -u "foo@example.com" -p "foobar1234"
+nativeblocks auth login --username "foo@example.com" --password "foobar1234"
+nativeblocks auth login -u "foo@example.com" -p "foobar1234"
+```
+
+#### Auth with access token
+
+- -a, --accessToken, access token
+
+```bash
+nativeblocks auth token --accessToken "123.123.123"
+nativeblocks auth token -a "123.123.123"
 ```
 
 ### Organization
