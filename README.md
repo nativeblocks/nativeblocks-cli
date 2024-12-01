@@ -3,7 +3,7 @@
 ### Installation
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/nativeblocks/nativeblocks-cli/main/installer.sh | bash
+curl -fsSL https://nativeblocks.io/download/cli/installer.sh | bash
 ```
 
 You can always find all command by help command
