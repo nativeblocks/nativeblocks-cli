@@ -114,7 +114,7 @@ nativeblocks integration sync -p /Users/sample/projects/awesome_project/integrat
 - -i, --integrationId, Integration working path
 
 ```bash
-nativeblocks integration -i "2222-2222-2222-2222" -p /Users/sample/projects/awesome_project/integrations/button/.nativeblocks
+nativeblocks integration get -i "2222-2222-2222-2222" -p /Users/sample/projects/awesome_project/integrations/button/.nativeblocks
 ```
 
 ### Frame
