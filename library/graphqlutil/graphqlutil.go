@@ -62,6 +62,10 @@ func (c *Client) Execute(url string, headers map[string]string, query string, va
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("graphql request failed: %s", body)
+	}
+
 	var graphQLResp GraphQLResponse
 	if err := json.Unmarshal(body, &graphQLResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response: %v", err)

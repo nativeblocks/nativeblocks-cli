@@ -28,16 +28,6 @@ nativeblocks region get
 
 ### Auth
 
-#### Auth with username and password
-
-- -u, --username, username
-- -p, --password, password
-
-```bash
-nativeblocks auth login --username "foo@example.com" --password "foobar1234"
-nativeblocks auth login -u "foo@example.com" -p "foobar1234"
-```
-
 #### Auth with access token
 
 - -a, --accessToken, access token
