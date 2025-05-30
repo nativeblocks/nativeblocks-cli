@@ -57,7 +57,7 @@ func integrationListCmd() *cobra.Command {
 			}
 
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Id", "Name", "KeyType", "Version", "Kind", "PlatformSupport"})
+			table.Header([]string{"Id", "Name", "KeyType", "Version", "Kind", "PlatformSupport"})
 
 			for _, integration := range integrations {
 				table.Append([]string{
