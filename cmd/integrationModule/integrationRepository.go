@@ -247,6 +247,7 @@ func SyncIntegration(regionUrl string, accessToken string, organizationId string
 		"platformSupport":  jsonInput.PlatformSupport,
 		"price":            0,
 		"version":          jsonInput.Version,
+		"versionName":      jsonInput.VersionName,
 		"deprecated":       jsonInput.Deprecated,
 		"deprecatedReason": jsonInput.DeprecatedReason,
 		"public":           false,

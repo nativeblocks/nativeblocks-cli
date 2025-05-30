@@ -9,6 +9,7 @@ type IntegrationModel struct {
 	Kind             string                     `json:"kind"`
 	ImageIcon        string                     `json:"imageIcon"`
 	Version          int                        `json:"version"`
+	VersionName      string                     `json:"versionName"`
 	Documentation    string                     `json:"documentation"`
 	Public           bool                       `json:"public"`
 	Manageable       bool                       `json:"manageable"`
